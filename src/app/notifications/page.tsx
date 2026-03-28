@@ -14,9 +14,9 @@ import type { Notification } from '@/types'
 export const metadata: Metadata = { title: 'Notifications' }
 
 const typeIcons: Record<string, React.ReactNode> = {
-  info:           <Info size={16} className="text-blue-400" />,
-  success:        <CheckCircle size={16} className="text-green-400" />,
-  warning:        <AlertTriangle size={16} className="text-amber-400" />,
+  info: <Info size={16} className="text-blue-400" />,
+  success: <CheckCircle size={16} className="text-green-400" />,
+  warning: <AlertTriangle size={16} className="text-amber-400" />,
   claim_approved: <CheckCircle size={16} className="text-green-400" />,
   claim_rejected: <XCircle size={16} className="text-red-400" />,
   contact_shared: <UserCheck size={16} className="text-[var(--color-accent)]" />,
@@ -90,11 +90,10 @@ export default async function NotificationsPage() {
               {notifs.map(notif => (
                 <div
                   key={notif.id}
-                  className={`bg-[var(--color-bg-surface)] border rounded-[var(--radius-md)] p-4 transition-all ${
-                    !notif.is_read
+                  className={`bg-[var(--color-bg-surface)] border rounded-[var(--radius-md)] p-4 transition-all ${!notif.is_read
                       ? 'border-l-4 border-l-[var(--color-accent)] border-r border-t border-b border-[var(--color-bg-border)]'
                       : 'border-[var(--color-bg-border)]'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 shrink-0">{typeIcons[notif.type] ?? typeIcons.info}</div>

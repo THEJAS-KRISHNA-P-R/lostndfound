@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { Logo } from '@/components/ui/Logo'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -45,8 +46,8 @@ export default function LoginPage() {
   return (
     <PageShell className="flex items-center justify-center min-h-screen px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <Link href="/" className="font-[var(--font-display)] text-2xl text-[var(--color-text-primary)]">LOFO</Link>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Logo className="mb-4 justify-center" scale={1.15} />
           <h1 className="font-[var(--font-display)] text-3xl text-[var(--color-text-primary)] mt-4 mb-1">Welcome back</h1>
           <p className="text-sm text-[var(--color-text-muted)]">Sign in to your account</p>
         </div>

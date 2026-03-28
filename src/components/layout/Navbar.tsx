@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
+import { Logo } from '@/components/ui/Logo'
 import { Home, Search, Plus, User, Bell, Menu, X, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -38,13 +39,7 @@ export function Navbar() {
       {/* ── Top Navbar ── */}
       <nav className="sticky top-0 z-40 h-[60px] flex items-center px-4 md:px-8 border-b border-[var(--color-bg-border)] backdrop-blur-xl bg-[var(--color-bg-surface)]/90">
         {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 mr-6 shrink-0 group"
-        >
-          <Image src="/logos/apple-touch-icon.png" alt="LOFO" width={32} height={32} className="w-8 h-8 rounded-[var(--radius-sm)] shadow-sm transition-transform group-active:scale-95" />
-          <span className="font-[var(--font-display)] text-xl text-[var(--color-text-primary)] tracking-tight">LOFO</span>
-        </Link>
+        <Logo className="mr-6" />
 
         {/* Center search — desktop only */}
         <div className="hidden md:flex flex-1 max-w-[480px] mx-auto">
