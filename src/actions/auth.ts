@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { LoginSchema, RegisterSchema } from '@/lib/validations/auth'
 import type { ActionResult } from '@/types'
 
-export async function login(formData: FormData): Promise<ActionResult> {
+export async function login(formData: FormData): Promise<ActionResult<{ role: string }>> {
   const raw = { email: formData.get('email'), password: formData.get('password') }
   const parsed = LoginSchema.safeParse(raw)
   if (!parsed.success) {
@@ -14,12 +14,18 @@ export async function login(formData: FormData): Promise<ActionResult> {
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword(parsed.data)
+  const { error, data } = await supabase.auth.signInWithPassword(parsed.data)
 
   if (error) return { success: false, error: 'Invalid email or password.' }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single()
+
   revalidatePath('/', 'layout')
-  return { success: true }
+  return { success: true, data: { role: profile?.role || 'user' } }
 }
 
 export async function register(formData: FormData): Promise<ActionResult> {

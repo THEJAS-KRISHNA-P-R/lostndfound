@@ -30,7 +30,11 @@ export default function LoginPage() {
       const result = await login(fd)
       if (result.success) {
         toast.success('Welcome back!')
-        router.push('/browse')
+        if (result.data?.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/browse')
+        }
         router.refresh()
       } else {
         toast.error(result.error ?? 'Login failed.')
