@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* ============================================================
+   LOFO Design System — Dark Editorial
+   ============================================================ */
+
+@theme inline {
+  /* Fonts */
+  --font-display: var(--font-playfair);
+  --font-body: var(--font-dm-sans);
+  --font-mono: var(--font-jetbrains);
+
+  /* Background palette */
+  --color-bg-base:     #0D0F14;
+  --color-bg-surface:  #161820;
+  --color-bg-elevated: #1E2028;
+  --color-bg-border:   #2A2D37;
+
+  /* Accent — warm amber gold */
+  --color-accent:      #F5A623;
+  --color-accent-hover:#E09410;
+  --color-accent-dim:  rgba(245, 166, 35, 0.12);
+  --color-accent-glow: rgba(245, 166, 35, 0.20);
+
+  /* Text */
+  --color-text-primary:   #F0F2F5;
+  --color-text-secondary: #8B8FA8;
+  --color-text-muted:     #4E5262;
+
+  /* Status */
+  --color-status-active:   #22C55E;
+  --color-status-claimed:  #F59E0B;
+  --color-status-resolved: #3B82F6;
+  --color-status-archived: #6B7280;
+  --color-status-pending:  #F59E0B;
+  --color-status-approved: #22C55E;
+  --color-status-rejected: #EF4444;
+
+  /* Type */
+  --color-type-lost:  #EF4444;
+  --color-type-found: #22C55E;
+
+  /* Radius tokens */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+/* ============================================================
+   Base Styles
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  min-height: 100dvh;
+}
+
+/* ============================================================
+   Scrollbar styling
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-bg-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ============================================================
+   Skeleton shimmer animation
+   ============================================================ */
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-surface) 25%,
+    var(--color-bg-elevated) 50%,
+    var(--color-bg-surface) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ============================================================
+   Focus visible — accessibility
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   Page transitions
+   ============================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: fadeIn 0.25s ease forwards;
+}
