@@ -66,7 +66,7 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
   // 1. Fetch Claim, Item, and Profiles
   const { data: claim } = await adminSupabase
     .from('claims')
-    .select(`*, items(id, title, user_id), profiles:claimer_id(id, full_name, email, phone)`)
+    .select(`*, items(id, title, user_id, type), profiles:claimer_id(id, full_name, email, phone)`)
     .eq('id', claimId)
     .single()
 
@@ -74,8 +74,10 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
     return { success: false, error: 'Claim or Item details not found.' }
   }
 
-  const founderId = (claim.items as any).user_id
-  const itemTitle = (claim.items as any).title
+  const claimItem = claim.items as any
+  const founderId = claimItem.user_id
+  const itemTitle = claimItem.title
+  const itemType = claimItem.type
   const claimee = claim.profiles as any
 
   // 2. Execute existing RPC for database consistency
@@ -89,12 +91,16 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
 
   // 3. Automated Messaging / Notifications
   try {
-    // Notify the Founder with Claimee contact details
+    const isReturningLost = itemType === 'lost'
+
+    // Notify the Poster (The person who needs the item back OR the person who found it)
     await adminSupabase.from('notifications').insert({
       user_id: founderId,
       sender_id: admin.id,
-      title: 'Claim Approved — Action Required',
-      message: `Great news! The claim for "${itemTitle}" has been approved. Please coordinate the return with ${claimee.full_name}.`,
+      title: isReturningLost ? 'Item Found — Action Required' : 'Claim Approved — Action Required',
+      message: isReturningLost 
+        ? `Great news! ${claimee.full_name} has found your "${itemTitle}." Please coordinate the return using their contact details.`
+        : `Great news! The claim for "${itemTitle}" has been approved. Please coordinate the return with ${claimee.full_name}.`,
       type: 'contact_shared',
       metadata: {
         name: claimee.full_name,
@@ -104,12 +110,14 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
       }
     })
 
-    // Notify the Claimee
+    // Notify the Submitter
     await adminSupabase.from('notifications').insert({
       user_id: claim.claimer_id,
       sender_id: admin.id,
-      title: 'Your Claim was Approved! ✅',
-      message: `Your claim for "${itemTitle}" has been approved by our team. The owner has been notified and will reach out to you via your contact details soon.`,
+      title: isReturningLost ? 'Your Found Report was Approved! ✅' : 'Your Claim was Approved! ✅',
+      message: isReturningLost
+        ? `Your report for "${itemTitle}" has been verified. The owner has been notified and will reach out to you using your contact details soon.`
+        : `Your claim for "${itemTitle}" has been approved by our team. The owner has been notified and will reach out to you via your contact details soon.`,
       type: 'claim_approved',
       metadata: { item_title: itemTitle, admin_note: adminNote }
     })

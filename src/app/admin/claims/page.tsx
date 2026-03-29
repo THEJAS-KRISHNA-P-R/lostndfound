@@ -68,7 +68,7 @@ export default async function AdminClaimsPage({
     <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-[var(--font-display)] text-2xl text-[var(--color-text-primary)]">
-          Claims
+          Interaction Reviews
         </h1>
         <div className="flex gap-1.5">
           {(['pending', 'approved', 'rejected', 'all'] as const).map(s => (

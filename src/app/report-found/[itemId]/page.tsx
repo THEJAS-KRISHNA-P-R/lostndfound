@@ -5,15 +5,15 @@ import { InteractionForm } from '@/components/items/InteractionForm'
 import type { PublicItem } from '@/types'
 
 export const metadata: Metadata = { 
-  title: 'Submit a Claim | LOFO',
-  description: 'Provide proof of ownership to reclaim your found item.'
+  title: 'Report Found Item | LOFO',
+  description: 'Provide details and proof to help return this item to its owner.'
 }
 
-interface ClaimPageProps {
+interface ReportFoundPageProps {
   params: Promise<{ itemId: string }>
 }
 
-export default async function ClaimPage({ params }: ClaimPageProps) {
+export default async function ReportFoundPage({ params }: ReportFoundPageProps) {
   const { itemId } = await params
   const supabase = await createClient()
 
@@ -24,7 +24,7 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
     .eq('status', 'active')
     .single()
 
-  if (!item || item.type !== 'found') notFound()
+  if (!item || item.type !== 'lost') notFound()
 
   return <InteractionForm item={item as PublicItem & { categories?: { name: string } | null }} />
 }

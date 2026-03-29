@@ -159,8 +159,10 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
               </Link>
             )}
             {canClaim && (
-              <Link href={`/claim/${typedItem.id}`}>
-                <Button fullWidth size="lg">Submit a Claim</Button>
+              <Link href={typedItem.type === 'found' ? `/claim/${typedItem.id}` : `/report-found/${typedItem.id}`}>
+                <Button fullWidth size="lg">
+                  {typedItem.type === 'found' ? 'Submit a Claim' : "I've Found This"}
+                </Button>
               </Link>
             )}
             {typedItem.status !== 'active' && !isOwner && !isAdmin && (
