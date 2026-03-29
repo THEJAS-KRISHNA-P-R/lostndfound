@@ -20,8 +20,14 @@ async function getItems(filters: Filters): Promise<(PublicItem & { profiles?: Pi
     .select(`*, profiles(id, full_name, avatar_url), categories(id, name)`)
 
   if (filters.type) query = query.eq('type', filters.type)
-  if (filters.status) query = query.eq('status', filters.status)
-  else query = query.eq('status', 'active')
+  
+  // Handle Status Gallery
+  if (filters.status === 'claimed') {
+    query = query.in('status', ['claimed', 'resolved'])
+  } else {
+    query = query.eq('status', 'active')
+  }
+
   if (filters.category) {
     const { data: cat } = await supabase.from('categories').select('id').eq('name', filters.category).single()
     if (cat) query = query.eq('category_id', cat.id)
@@ -43,6 +49,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const filters: Filters = {
     type: (params.type as 'lost' | 'found') || undefined,
     category: params.category || undefined,
+    status: (params.status as 'active' | 'claimed') || 'active',
     q: params.q || undefined,
     sort: (params.sort as 'latest' | 'oldest') || 'latest',
   }

@@ -5,36 +5,64 @@ import { useRouter, useSearchParams } from 'next/navigation'
 export function ModeToggle() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const current = searchParams.get('type') ?? 'lost'
+  
+  // Determine current mode
+  const currentStatus = searchParams.get('status')
+  const currentType = searchParams.get('type') ?? 'lost'
+  const mode = currentStatus === 'claimed' ? 'claimed' : currentType
 
-  const toggle = (type: 'lost' | 'found') => {
+  const toggle = (m: 'lost' | 'found' | 'claimed') => {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('type', type)
-    router.push(`/browse?${params.toString()}`)
+    if (m === 'claimed') {
+      params.set('status', 'claimed')
+      params.delete('type')
+    } else {
+      params.set('type', m)
+      params.delete('status')
+    }
+    router.push(`/browse?${params.toString()}`, { scroll: false })
   }
 
   return (
-    <div className="relative inline-flex bg-[var(--color-bg-elevated)] rounded-[var(--radius-xl)] p-1 border border-[var(--color-bg-border)]">
-      {/* Sliding indicator */}
+    <div className="relative inline-flex bg-[var(--color-bg-elevated)] rounded-[var(--radius-xl)] p-1 border border-[var(--color-bg-border)] min-w-[280px]">
+      {/* Sliding indicator - 3 segments */}
       <div
-        className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-[calc(var(--radius-xl)-4px)] bg-[var(--color-accent)] transition-transform duration-200 ease-in-out"
-        style={{ left: 4, transform: current === 'found' ? 'translateX(calc(100% + 8px))' : 'none' }}
+        className="absolute top-1 bottom-1 w-[calc(33.33%-4px)] rounded-[calc(var(--radius-xl)-4px)] bg-[var(--color-accent)] transition-all duration-300 ease-out"
+        style={{ 
+          left: 4, 
+          transform: mode === 'found' 
+            ? 'translateX(calc(100% + 2px))' 
+            : mode === 'claimed' 
+            ? 'translateX(calc(200% + 4px))' 
+            : 'none' 
+        }}
       />
+      
       <button
         onClick={() => toggle('lost')}
-        className={`relative z-10 px-4 py-1.5 text-sm font-medium rounded-[calc(var(--radius-xl)-4px)] transition-colors duration-200 ${
-          current === 'lost' ? 'text-[#0D0F14] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+        className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-[calc(var(--radius-xl)-4px)] transition-colors duration-200 ${
+          mode === 'lost' ? 'text-[#0D0F14] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
         }`}
       >
-        Lost Items
+        Lost
       </button>
+      
       <button
         onClick={() => toggle('found')}
-        className={`relative z-10 px-4 py-1.5 text-sm font-medium rounded-[calc(var(--radius-xl)-4px)] transition-colors duration-200 ${
-          current === 'found' ? 'text-[#0D0F14] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+        className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-[calc(var(--radius-xl)-4px)] transition-colors duration-200 ${
+          mode === 'found' ? 'text-[#0D0F14] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
         }`}
       >
-        Found Items
+        Found
+      </button>
+
+      <button
+        onClick={() => toggle('claimed')}
+        className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-[calc(var(--radius-xl)-4px)] transition-colors duration-200 ${
+          mode === 'claimed' ? 'text-[#0D0F14] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+        }`}
+      >
+        Claimed
       </button>
     </div>
   )

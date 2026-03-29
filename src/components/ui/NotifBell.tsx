@@ -16,9 +16,14 @@ export function NotifBell({ count }: NotifBellProps) {
     >
       <Bell size={20} />
       {count > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 rounded-full bg-[var(--color-accent)] text-[#0D0F14] text-[10px] font-bold flex items-center justify-center">
-          {count > 99 ? '99+' : count}
-        </span>
+        <span 
+          className="absolute top-1 right-1 w-3 h-3 rounded-full animate-pulse z-50 pointer-events-none"
+          style={{ 
+            background: '#FF9800', 
+            boxShadow: '0 0 14px rgba(255, 152, 0, 0.7)',
+            border: '2px solid var(--color-bg-base)'
+          }}
+        />
       )}
     </Link>
   )

@@ -91,6 +91,7 @@ export default async function ProfilePage({
           {tab === 'posts' ? (
             <ItemGrid
               items={myItems}
+              editable
               emptyMessage="You haven't posted any items yet."
               emptyCta={
                 <Link href="/post" className="px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] text-[#0D0F14] text-sm font-semibold">

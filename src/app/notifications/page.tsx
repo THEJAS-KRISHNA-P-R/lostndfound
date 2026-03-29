@@ -7,46 +7,19 @@ import { Footer } from '@/components/layout/Footer'
 import { markAllRead } from '@/actions/notifications'
 import { formatRelative } from '@/utils/formatDate'
 import {
-  Info, CheckCircle, AlertTriangle, XCircle, UserCheck, Copy
+  Info, CheckCircle, AlertTriangle, XCircle, UserCheck
 } from 'lucide-react'
+import { ContactCard } from '@/components/notifications/ContactCard'
+import { MarkReadOnMount } from '@/components/notifications/MarkReadOnMount'
 import type { Notification } from '@/types'
-
-export const metadata: Metadata = { title: 'Notifications' }
 
 const typeIcons: Record<string, React.ReactNode> = {
   info: <Info size={16} className="text-blue-400" />,
   success: <CheckCircle size={16} className="text-green-400" />,
-  warning: <AlertTriangle size={16} className="text-amber-400" />,
-  claim_approved: <CheckCircle size={16} className="text-green-400" />,
+  warning: <AlertTriangle size={16} className="text-orange-400" />,
+  claim_approved: <UserCheck size={16} className="text-[var(--color-accent)]" />,
   claim_rejected: <XCircle size={16} className="text-red-400" />,
   contact_shared: <UserCheck size={16} className="text-[var(--color-accent)]" />,
-}
-
-function ContactCard({ metadata }: { metadata: Notification['metadata'] }) {
-  if (!metadata) return null
-  return (
-    <div className="mt-3 bg-[var(--color-bg-surface)] border border-[var(--color-accent)] border-opacity-30 rounded-[var(--radius-sm)] p-4 space-y-2">
-      <p className="text-xs font-semibold text-[var(--color-accent)] uppercase tracking-wide mb-2">Contact Details</p>
-      {metadata.name && <p className="text-sm text-[var(--color-text-primary)] font-medium">{metadata.name}</p>}
-      {metadata.email && (
-        <div className="flex items-center gap-2">
-          <p className="text-sm text-[var(--color-text-secondary)]">{metadata.email}</p>
-          <button
-            onClick={() => navigator.clipboard.writeText(metadata.email!)}
-            className="text-[10px] px-2 py-0.5 rounded bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] flex items-center gap-1 transition-colors"
-          >
-            <Copy size={10} /> Copy
-          </button>
-        </div>
-      )}
-      {metadata.phone && <p className="text-sm text-[var(--color-text-secondary)]">{metadata.phone}</p>}
-      {metadata.admin_note && (
-        <p className="text-xs text-[var(--color-text-muted)] italic border-t border-[var(--color-bg-border)] pt-2 mt-2">
-          Admin note: {metadata.admin_note}
-        </p>
-      )}
-    </div>
-  )
 }
 
 export default async function NotificationsPage() {
@@ -67,6 +40,7 @@ export default async function NotificationsPage() {
     <PageShell>
       <div className="flex flex-col min-h-screen">
         <Navbar />
+        <MarkReadOnMount />
         <main className="flex-1 max-w-2xl mx-auto w-full px-4 md:px-8 py-8 pb-24 md:pb-8">
           <div className="flex items-center justify-between mb-6">
             <div>

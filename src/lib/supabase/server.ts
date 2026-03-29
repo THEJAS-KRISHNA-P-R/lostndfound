@@ -22,6 +22,11 @@ export async function createClient() {
           }
         },
       },
+      auth: {
+        // Bypass global navigator.locks on the Node server to prevent lock stealing 
+        // during concurrent SSR hydration/Server Component rendering.
+        lock: (name, timeout, fn) => fn()
+      }
     }
   )
 }

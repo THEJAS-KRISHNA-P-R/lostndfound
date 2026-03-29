@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
+import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@/lib/supabase/server'
 import { ClaimReviewCard } from '@/components/admin/ClaimReviewCard'
 import type { Claim, Profile, Item } from '@/types'
@@ -19,15 +21,48 @@ export default async function AdminClaimsPage({
   const filterStatus = sp.status ?? 'pending'
 
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  // Strict check on role to ensure admin status before fetching
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user?.id).single()
+  if (profile?.role !== 'admin') {
+    return <div className="p-8 text-center text-red-500 font-medium tracking-tight">Access Denied: Admin privileges required.</div>
+  }
+
   let query = supabase
     .from('claims')
-    .select(`*, profiles(id, full_name, email, phone, uni_reg_no, avatar_url), items(id, title, type, images, status)`)
+    .select(`*, profiles:claimer_id(id, full_name, email, phone, uni_reg_no, avatar_url), items(id, title, type, images, status)`)
     .order('created_at', { ascending: false })
 
   if (filterStatus !== 'all') query = query.eq('status', filterStatus)
 
-  const { data } = await query.limit(50)
-  const claims = (data as FullClaim[]) ?? []
+  const { data, error } = await query.limit(50)
+  if (error) {
+    console.error('Admin Claims Fetch Error:', error)
+  }
+  
+  // High-privilege client to bypass RLS for generating signed URLs for proof images
+  const adminSupabase = await createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { cookies: { getAll: () => [], setAll: () => {} } }
+  )
+
+  // Transform claims to include signed URLs for private proof images
+  const rawClaims = (data as FullClaim[]) ?? []
+  const claims = await Promise.all(rawClaims.map(async (claim) => {
+    if (claim.proof_images && claim.proof_images.length > 0) {
+      const { data: signedData } = await adminSupabase.storage
+        .from('proof-images')
+        .createSignedUrls(claim.proof_images, 3600) // 1 hour expiry
+      
+      return {
+        ...claim,
+        proof_images: signedData?.map(d => d.signedUrl).filter(Boolean) as string[] ?? []
+      }
+    }
+    return claim
+  }))
 
   return (
     <div className="p-6 md:p-8">

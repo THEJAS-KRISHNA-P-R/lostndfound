@@ -23,7 +23,7 @@ const navLinks = [
 
 export function Navbar() {
   const { isAuthed, isAdmin, profile } = useAuth()
-  const { unreadCount } = useNotifications()
+  const { unreadCount } = useNotifications(profile?.id)
   const pathname = usePathname()
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -137,9 +137,14 @@ export function Navbar() {
             >
               <Bell size={20} strokeWidth={pathname === '/notifications' ? 2.5 : 1.5} />
               {unreadCount > 0 && (
-                <span className="absolute top-2 right-[calc(50%-14px)] w-4 h-4 rounded-full bg-[var(--color-accent)] text-[#0D0F14] text-[9px] font-bold flex items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+                <span 
+                  className="absolute top-2 right-[calc(50%-14px)] w-3 h-3 rounded-full animate-pulse z-50 pointer-events-none" 
+                  style={{ 
+                    background: '#FF9800', 
+                    boxShadow: '0 0 14px rgba(255, 152, 0, 0.7)',
+                    border: '2px solid var(--color-bg-surface)'
+                  }}
+                />
               )}
               Notifs
             </Link>

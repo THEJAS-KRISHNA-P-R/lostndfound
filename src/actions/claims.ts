@@ -1,5 +1,6 @@
 'use server'
 
+import { createServerClient } from '@supabase/ssr'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { ClaimSchema } from '@/lib/validations/claim'
@@ -52,18 +53,73 @@ export async function createClaim(formData: FormData): Promise<ActionResult> {
 
 export async function approveClaim(claimId: string, adminNote: string): Promise<ActionResult> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const { data: { user: admin } } = await supabase.auth.getUser()
+  if (!admin) return { success: false, error: 'Unauthorized' }
 
-  const { error } = await supabase.rpc('approve_claim', {
+  // High-privilege client to fetch private contact info for coordination
+  const adminSupabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { cookies: { getAll: () => [], setAll: () => {} } }
+  )
+
+  // 1. Fetch Claim, Item, and Profiles
+  const { data: claim } = await adminSupabase
+    .from('claims')
+    .select(`*, items(id, title, user_id), profiles:claimer_id(id, full_name, email, phone)`)
+    .eq('id', claimId)
+    .single()
+
+  if (!claim || !claim.items || !claim.profiles) {
+    return { success: false, error: 'Claim or Item details not found.' }
+  }
+
+  const founderId = (claim.items as any).user_id
+  const itemTitle = (claim.items as any).title
+  const claimee = claim.profiles as any
+
+  // 2. Execute existing RPC for database consistency
+  const { error: rpcError } = await supabase.rpc('approve_claim', {
     p_claim_id: claimId,
-    p_admin_id: user.id,
+    p_admin_id: admin.id,
     p_admin_note: adminNote,
   })
 
-  if (error) return { success: false, error: error.message }
+  if (rpcError) return { success: false, error: rpcError.message }
+
+  // 3. Automated Messaging / Notifications
+  try {
+    // Notify the Founder with Claimee contact details
+    await adminSupabase.from('notifications').insert({
+      user_id: founderId,
+      sender_id: admin.id,
+      title: 'Claim Approved — Action Required',
+      message: `Great news! The claim for "${itemTitle}" has been approved. Please coordinate the return with ${claimee.full_name}.`,
+      type: 'contact_shared',
+      metadata: {
+        name: claimee.full_name,
+        email: claimee.email,
+        phone: claimee.phone,
+        admin_note: adminNote
+      }
+    })
+
+    // Notify the Claimee
+    await adminSupabase.from('notifications').insert({
+      user_id: claim.claimer_id,
+      sender_id: admin.id,
+      title: 'Your Claim was Approved! ✅',
+      message: `Your claim for "${itemTitle}" has been approved by our team. The owner has been notified and will reach out to you via your contact details soon.`,
+      type: 'claim_approved',
+      metadata: { item_title: itemTitle, admin_note: adminNote }
+    })
+  } catch (notifWarn) {
+    console.error('Notification Warning:', notifWarn)
+  }
 
   revalidatePath('/admin/claims')
+  revalidatePath('/notifications')
+  revalidatePath(`/items/${claim.item_id}`)
   return { success: true }
 }
 
@@ -98,5 +154,7 @@ export async function rejectClaim(claimId: string, reason: string): Promise<Acti
   })
 
   revalidatePath('/admin/claims')
+  revalidatePath('/notifications')
+  revalidatePath(`/items/${claim.item_id}`)
   return { success: true }
 }

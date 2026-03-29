@@ -12,6 +12,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { formatFull, formatRelative } from '@/utils/formatDate'
 import type { Item, Profile, Category, Claim } from '@/types'
+import { ImageCarousel } from '@/components/items/ImageCarousel'
 
 type FullItem = Item & {
   profiles: Pick<Profile, 'id' | 'full_name' | 'avatar_url' | 'email'>
@@ -61,7 +62,7 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
   const isOwner = user?.id === typedItem.user_id
   const isAdmin = userProfile?.role === 'admin'
   const canSeePrivate = isOwner || isAdmin
-  const canClaim = !!user && !isOwner && typedItem.status === 'active'
+  const canClaim = !!user && !isOwner && !isAdmin && typedItem.status === 'active'
 
   // Get claims for owner/admin view
   let claims: ClaimWithProfile[] = []
@@ -74,8 +75,6 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
     claims = (data as ClaimWithProfile[]) ?? []
   }
 
-  const images = typedItem.images ?? []
-
   return (
     <PageShell>
       <Navbar />
@@ -87,24 +86,7 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* ── Images ── */}
-          <div>
-            <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] relative">
-              {images[0] ? (
-                <Image src={images[0]} alt={typedItem.title} fill className="object-cover" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-20">📦</div>
-              )}
-            </div>
-            {images.length > 1 && (
-              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                {images.slice(1).map((img, i) => (
-                  <div key={i} className="relative w-16 h-16 shrink-0 rounded-[var(--radius-sm)] overflow-hidden border border-[var(--color-bg-border)]">
-                    <Image src={img} alt={`${typedItem.title} ${i + 2}`} fill className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ImageCarousel images={typedItem.images ?? []} title={typedItem.title} />
 
           {/* ── Details ── */}
           <div className="space-y-5">
@@ -163,14 +145,19 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
                   )}
                   {typedItem.private_details && (
                     <div className="mt-2 p-3 bg-[var(--color-bg-surface)] rounded-[var(--radius-sm)] text-xs text-[var(--color-text-secondary)] leading-relaxed border border-[var(--color-bg-border)]">
-                      {typedItem.private_details}
+                       {typedItem.private_details}
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Claim button */}
+            {/* Edit / Claim button */}
+            {isOwner && typedItem.status === 'active' && (
+              <Link href={`/edit/${typedItem.id}`}>
+                <Button variant="outline" fullWidth size="lg">Edit Post</Button>
+              </Link>
+            )}
             {canClaim && (
               <Link href={`/claim/${typedItem.id}`}>
                 <Button fullWidth size="lg">Submit a Claim</Button>
