@@ -12,9 +12,9 @@ export function useNotifications(userId?: string) {
   useEffect(() => {
     isMounted.current = true
     const supabase = createClient()
-    let channel: any = null
-    let authListener: any = null
-    let interval: any = null
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let authListener: { subscription: ReturnType<typeof supabase.auth.onAuthStateChange>['data']['subscription'] } | null = null
+    let interval: NodeJS.Timeout | null = null
 
     const fetchCount = async () => {
       if (!isMounted.current || isFetching.current) return
@@ -30,7 +30,7 @@ export function useNotifications(userId?: string) {
           
           // Global diagnostic for F12 console
           if (typeof window !== 'undefined') {
-            ;(window as any).__LOFO_UNREAD_COUNT = count
+            (window as { __LOFO_UNREAD_COUNT?: number }).__LOFO_UNREAD_COUNT = count
           }
         }
       } catch (err) {
@@ -69,8 +69,8 @@ export function useNotifications(userId?: string) {
             table: 'notifications',
             filter: `user_id=eq.${targetId}` 
           },
-          (payload: any) => {
-            console.log('🔔 [Notifications] Realtime event received:', payload.eventType)
+          (payload: { eventType: string }) => {
+            console.log('📦 [Notifications] Realtime event received:', payload.eventType)
             fetchCount()
           }
         )
@@ -92,13 +92,14 @@ export function useNotifications(userId?: string) {
     if (userId) {
       setupRealtime(userId)
     } else {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
-        if (session?.user && isMounted.current) setupRealtime(session.user.id)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: unknown, session: unknown) => {
+        const user = (session as { user: { id: string } } | null)?.user
+        if (user && isMounted.current) setupRealtime(user.id)
         else if (isMounted.current) setUnreadCount(0)
       })
       authListener = { subscription }
       
-      supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
+      supabase.auth.getUser().then(({ data: { user } }: { data: { user: { id: string } | null } }) => {
         if (user && isMounted.current) setupRealtime(user.id)
       })
     }

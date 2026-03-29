@@ -8,9 +8,9 @@ export function Footer() {
         <div className="flex items-center gap-3">
           <Logo scale={0.8} />
           <span className="text-[var(--color-text-muted)] text-sm">—</span>
-          <span className="text-[var(--color-text-muted)] text-sm">Find what's yours.</span>
-        </div>
-        <div className="flex items-center gap-6 text-sm text-[var(--color-text-muted)]">
+          <p className="text-xs text-[var(--color-text-muted)] text-center max-w-md mx-auto leading-relaxed">
+          The official digital hub for lost &apos;n found items at your campus. Fast, secure, and verification-first.
+        </p>
           <Link href="/browse" className="hover:text-[var(--color-text-secondary)] transition-colors">Browse</Link>
           <Link href="/post" className="hover:text-[var(--color-text-secondary)] transition-colors">Post Item</Link>
           <span>© {new Date().getFullYear()} LOFO</span>

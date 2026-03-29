@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { ClaimSchema } from '@/lib/validations/claim'
+import { sanitize } from '@/utils/sanitize'
 import type { ActionResult } from '@/types'
 
 export async function createClaim(formData: FormData): Promise<ActionResult> {
@@ -26,7 +27,7 @@ export async function createClaim(formData: FormData): Promise<ActionResult> {
   }
 
   const raw = {
-    description: formData.get('description'),
+    description: sanitize(formData.get('description') as string),
     proof_images: formData.getAll('proof_images').filter(Boolean) as string[],
   }
 
@@ -74,11 +75,11 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
     return { success: false, error: 'Claim or Item details not found.' }
   }
 
-  const claimItem = claim.items as any
+  const claimItem = claim.items as unknown as { id: string; title: string; user_id: string; type: string }
   const founderId = claimItem.user_id
   const itemTitle = claimItem.title
   const itemType = claimItem.type
-  const claimee = claim.profiles as any
+  const claimee = claim.profiles as unknown as { full_name: string; email: string; phone: string }
 
   // 2. Execute existing RPC for database consistency
   const { error: rpcError } = await supabase.rpc('approve_claim', {
@@ -164,5 +165,56 @@ export async function rejectClaim(claimId: string, reason: string): Promise<Acti
   revalidatePath('/admin/claims')
   revalidatePath('/notifications')
   revalidatePath(`/items/${claim.item_id}`)
+  return { success: true }
+}
+
+export async function confirmHandover(
+  claimId: string,
+  role: 'poster' | 'claimer'
+): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
+
+  const col = role === 'poster' ? 'poster_confirmed_at' : 'claimer_confirmed_at'
+  const { error } = await supabase
+    .from('claims')
+    .update({ [col]: new Date().toISOString() })
+    .eq('id', claimId)
+  if (error) return { success: false, error: error.message }
+
+  // Auto-resolve when both sides confirm
+  const { data: updated } = await supabase
+    .from('claims')
+    .select('poster_confirmed_at, claimer_confirmed_at, item_id')
+    .eq('id', claimId)
+    .single()
+
+  if (updated?.poster_confirmed_at && updated?.claimer_confirmed_at) {
+    await supabase.from('items').update({ status: 'resolved' }).eq('id', updated.item_id)
+    revalidatePath(`/items/${updated.item_id}`)
+  }
+  revalidatePath(`/items/${updated?.item_id}`)
+  return { success: true }
+}
+
+export async function assignToSecurityDesk(
+  itemId: string,
+  location: string
+): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return { success: false, error: 'Admin only' }
+
+  const { error } = await supabase
+    .from('items')
+    .update({ security_location: location })
+    .eq('id', itemId)
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/admin/items')
+  revalidatePath('/admin')
   return { success: true }
 }

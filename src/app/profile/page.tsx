@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
@@ -115,7 +116,14 @@ export default async function ProfilePage({
                   >
                     <div className="relative w-14 h-14 shrink-0 rounded-[var(--radius-sm)] overflow-hidden bg-[var(--color-bg-elevated)]">
                       {claim.items?.images?.[0] ? (
-                        <img src={claim.items.images[0]} alt={claim.items.title} className="w-full h-full object-cover" />
+                        <div className="w-full h-full relative">
+                          <Image 
+                            src={claim.items.images[0]} 
+                            alt={claim.items.title} 
+                            fill
+                            className="object-cover" 
+                          />
+                        </div>
                       ) : <span className="absolute inset-0 flex items-center justify-center text-xl opacity-20">📦</span>}
                     </div>
                     <div className="flex-1 min-w-0">

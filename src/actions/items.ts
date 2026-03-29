@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PostItemSchema } from '@/lib/validations/item'
+import { sanitize } from '@/utils/sanitize'
 import type { ActionResult } from '@/types'
 
 export async function createItem(formData: FormData): Promise<ActionResult<{ id: string }>> {
@@ -13,13 +14,13 @@ export async function createItem(formData: FormData): Promise<ActionResult<{ id:
 
   const raw = {
     type: formData.get('type'),
-    title: formData.get('title'),
+    title: sanitize(formData.get('title') as string),
     category_id: formData.get('category_id') ? Number(formData.get('category_id')) : undefined,
-    description: formData.get('description') || undefined,
-    location: formData.get('location'),
+    description: sanitize(formData.get('description') as string) || undefined,
+    location: sanitize(formData.get('location') as string),
     date_occurred: formData.get('date_occurred'),
     time_occurred: formData.get('time_occurred') || undefined,
-    private_details: formData.get('private_details') || undefined,
+    private_details: sanitize(formData.get('private_details') as string) || undefined,
     images: formData.getAll('images').filter(Boolean) as string[],
   }
 
@@ -45,13 +46,13 @@ export async function updateItem(id: string, formData: FormData): Promise<Action
 
   const raw = {
     type: formData.get('type'),
-    title: formData.get('title'),
+    title: sanitize(formData.get('title') as string),
     category_id: formData.get('category_id') ? Number(formData.get('category_id')) : undefined,
-    description: formData.get('description') || undefined,
-    location: formData.get('location'),
+    description: sanitize(formData.get('description') as string) || undefined,
+    location: sanitize(formData.get('location') as string),
     date_occurred: formData.get('date_occurred'),
     time_occurred: formData.get('time_occurred') || undefined,
-    private_details: formData.get('private_details') || undefined,
+    private_details: sanitize(formData.get('private_details') as string) || undefined,
     images: formData.getAll('images').filter(Boolean) as string[],
   }
 
@@ -120,6 +121,32 @@ export async function deleteItem(id: string): Promise<ActionResult> {
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/browse')
-  revalidatePath('/admin/items')
+  revalidatePath(`/items/${id}`)
   redirect('/browse')
+}
+
+export async function bulkArchiveFlaggedItems(): Promise<ActionResult> {
+  const supabase = await createClient()
+  
+  // 1. Verify admin role
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
+  
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return { success: false, error: 'Forbidden' }
+
+  // 2. Perform bulk update: set status 'archived' for all 'flagged' items
+  const { error } = await supabase
+    .from('items')
+    .update({ status: 'archived' })
+    .eq('status', 'flagged')
+
+  if (error) {
+    console.error('Bulk Archival Error:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/items')
+  return { success: true }
 }

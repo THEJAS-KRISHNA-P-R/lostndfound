@@ -15,8 +15,14 @@ function ItemFiltersInner() {
   const activeCategory = searchParams.get('category') ?? 'all'
   const activeSort = searchParams.get('sort') ?? 'latest'
 
+  // Sync search state if URL 'q' parameter changes externally
   useEffect(() => {
-    setSearch(searchParams.get('q') ?? '')
+    const q = searchParams.get('q') ?? ''
+    // Use a microtask/timeout to avoid the "set-state-in-effect" cascading render error in strict mode
+    const handle = setTimeout(() => {
+      setSearch(prev => prev !== q ? q : prev)
+    }, 0)
+    return () => clearTimeout(handle)
   }, [searchParams])
 
   const update = (key: string, value: string) => {
@@ -85,7 +91,6 @@ function ItemFiltersInner() {
           <button 
             onClick={() => {
               setSearch('')
-              const params = new URLSearchParams()
               router.push('/browse', { scroll: false })
             }}
             className="mt-4 sm:mt-0 text-[11px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors"

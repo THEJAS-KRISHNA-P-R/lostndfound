@@ -7,6 +7,16 @@
 
 **LOFO** is a premium, campus-wide lost-and-found marketplace built for speed, security, and a visually stunning user experience. We help communities reclaim their belongings through an editorial-style interface and a "Zero-Leak" logic system.
 
+## 🎯 Our Goal
+To eliminate the "Lost & Found" anxiety through a secure, transparent, and visually premium campus-exclusive platform. We aim to turn a frustrating experience into a seamless, high-confidence journey.
+
+## 💎 The LOFO USP (Unique Selling Propositions)
+- **"Zero-Leak" Privacy Protocol**: Owners maintain total anonymity. No personal data is shared until a match is confirmed by both parties.
+- **Mandatory Proof-of-Possession**: Built-in verification requirements for high-value items, including mandatory photo proof for found items.
+- **Command Center Administration**: A robust, high-visibility admin dashboard for university security to manage thousands of items with bulk actions.
+- **Truth-Bridge Sync**: A resilient, server-side notification engine that guarantees every interaction is tracked and notified instantly.
+- **Editorial-Grade UX**: A luxury, display-oriented design that feels like a high-end marketplace, not a utility tool.
+
 ## 🚀 "State-of-the-Art" Architecture
 
 - **Next.js 16.2.0 (Turbopack)**: Blazing-fast development and optimized production bundles.

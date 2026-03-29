@@ -42,7 +42,7 @@ export default function PostItemPage() {
   const [isPending, startTransition] = useTransition()
   const [itemType, setItemType] = useState<'found' | 'lost'>('found')
 
-  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
     defaultValues: { images: [] },
   })
 
@@ -119,7 +119,6 @@ export default function PostItemPage() {
                   maxFiles={4}
                   bucket="item-images"
                   onComplete={urls => field.onChange(urls)}
-                  onError={msg => toast.error(msg)}
                   label="Upload Photos"
                 />
               )}

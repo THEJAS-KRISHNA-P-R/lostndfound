@@ -26,7 +26,7 @@ export type Item = {
   date_occurred: string
   time_occurred?: string
   private_details?: string
-  status: 'active' | 'claimed' | 'resolved' | 'archived'
+  status: 'active' | 'claimed' | 'resolved' | 'archived' | 'flagged'
   created_at: string
   updated_at: string
   profiles?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>
@@ -42,7 +42,7 @@ export type PublicItem = {
   description?: string
   category_id?: number
   images?: string[]
-  status: 'active' | 'claimed' | 'resolved' | 'archived'
+  status: 'active' | 'claimed' | 'resolved' | 'archived' | 'flagged'
   created_at: string
   updated_at: string
   profiles?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>
@@ -59,9 +59,11 @@ export type Claim = {
   admin_note?: string
   reviewed_by?: string
   reviewed_at?: string
+  poster_confirmed_at?: string | null
+  claimer_confirmed_at?: string | null
   created_at: string
   profiles?: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone' | 'uni_reg_no' | 'avatar_url'>
-  items?: Pick<PublicItem, 'id' | 'title' | 'type' | 'images' | 'status'>
+  items?: Pick<Item, 'id' | 'title' | 'type' | 'images' | 'status' | 'private_details'>
 }
 
 export type Notification = {

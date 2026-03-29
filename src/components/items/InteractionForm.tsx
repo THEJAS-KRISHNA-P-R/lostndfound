@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import { createClaim } from '@/actions/claims'
@@ -29,12 +29,13 @@ export function InteractionForm({ item }: InteractionFormProps) {
   const [isPending, startTransition] = useTransition()
   const isLostItem = item.type === 'lost'
 
-  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
     defaultValues: { proof_images: [] },
   })
 
-  const descLength = watch('description')?.length ?? 0
-  const images = watch('proof_images') || []
+  const description = useWatch({ control, name: 'description' })
+  const images = useWatch({ control, name: 'proof_images' }) || []
+  const descLength = description?.length ?? 0
 
   const onSubmit = (data: FormData) => {
     // Security Check: Photo is MANDATORY for returning a lost item
@@ -105,10 +106,13 @@ export function InteractionForm({ item }: InteractionFormProps) {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-medium text-[var(--color-text-secondary)]">
-                {isLostItem ? 'Describe where and when you found it' : 'Describe why this item is yours'} <span className="text-red-400">*</span>
+                {isLostItem ? 'Describe where and when you found it' : 'Describe details only the true owner would know'} <span className="text-red-400">*</span>
               </label>
               <span className={`text-xs ${descLength < 50 ? 'text-red-400' : 'text-[var(--color-text-muted)]'}`}>{descLength}/50 min</span>
             </div>
+            {!isLostItem && (
+              <p className="text-[11px] text-amber-400/80 mb-2 italic">Do not describe what&apos;s visible in the photos. Describe hidden details — a scratch, engraving, sticker, damage, or anything only the owner would know.</p>
+            )}
             <textarea
               {...register('description', {
                 required: 'Description is required',
@@ -116,7 +120,7 @@ export function InteractionForm({ item }: InteractionFormProps) {
               })}
               rows={5}
               className="w-full bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-sm)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
-              placeholder={isLostItem ? "e.g. I found it at the Library 3rd floor cafeteria at 2 PM..." : "Describe unique identifiers, distinguishing features..."}
+              placeholder={isLostItem ? "e.g. I found it at the Library 3rd floor cafeteria at 2 PM..." : "e.g. has a crack on the back-left corner, custom red sticker on the spine, broken clasp..."}
             />
             {errors.description && <p className="mt-1 text-xs text-red-500 font-medium">{errors.description.message}</p>}
           </div>

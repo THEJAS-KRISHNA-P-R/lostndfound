@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 import { AlertTriangle, ArrowLeft } from 'lucide-react'
@@ -28,12 +28,13 @@ export function ClaimFormClient({ item }: ClaimFormClientProps) {
   const [isPending, startTransition] = useTransition()
   const isLostItem = item.type === 'lost'
 
-  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
     defaultValues: { proof_images: [] },
   })
 
-  const descLength = watch('description')?.length ?? 0
-  const images = watch('proof_images') || []
+  const description = useWatch({ control, name: 'description' })
+  const images = useWatch({ control, name: 'proof_images' }) || []
+  const descLength = description?.length ?? 0
 
   const onSubmit = (data: FormData) => {
     // Security Check: Photo is MANDATORY for returning a lost item

@@ -1,6 +1,9 @@
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
+import sharp from 'sharp'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 async function mergeLogos() {
   try {
@@ -8,51 +11,32 @@ async function mergeLogos() {
     const textPath = path.join(__dirname, 'public/logos/lofo.png');
     const outputPath = path.join(__dirname, 'public/logos/lofo-merged.png');
 
-    // Get metadata
-    const iconMeta = await sharp(iconPath).metadata();
-    const textMeta = await sharp(textPath).metadata();
-
-    // In Navbar, Icon is 48x48, Text is height 40. 
-    // We'll scale up by 4x to maintain high resolution (Icon: 192x192, Text: height 160)
-    const targetIconSize = 192;
-    const targetTextHeight = 160;
-
-    // We'll resize the text image to height 160.
-    const resizedTextBuffer = await sharp(textPath)
-      .resize({ height: targetTextHeight })
-      .toBuffer();
-
-    const resizedTextMeta = await sharp(resizedTextBuffer).metadata();
-
-    // Gap reduced for tighter branding
-    const gap = -5;
-
-    // Total width canvas
-    const totalWidth = targetIconSize + gap + resizedTextMeta.width;
-    const totalHeight = 192; // max height is the icon
-
-    // Calculate Y offset for the text to vertically center it against the icon
-    const textYOffset = Math.floor((totalHeight - targetTextHeight) / 2);
+    const iconResized = await sharp(iconPath).resize({ width: 192, height: 192 }).toBuffer();
+    const textResized = await sharp(textPath).resize({ height: 160 }).toBuffer();
 
     // Create a blank transparent canvas
-    const baseCanvas = await sharp({
+    const combinedCanvas = sharp({
       create: {
-        width: totalWidth,
-        height: totalHeight,
+        width: 1200,
+        height: 630,
         channels: 4,
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
+        background: { r: 13, g: 15, b: 20, alpha: 1 }
       }
-    })
+    });
+
+    // Composite them
+    await combinedCanvas
       .composite([
-        { input: iconPath, top: 0, left: 0 },
-        { input: resizedTextBuffer, top: textYOffset, left: targetIconSize + gap }
+        { input: iconResized, top: 219, left: 350 }, 
+        { input: textResized, top: 235, left: 560 }
       ])
       .png()
       .toFile(outputPath);
 
     console.log('Successfully created', outputPath);
-  } catch (err) {
-    console.error('Error merging logos:', err);
+  } catch {
+    console.error('Migration merge failed');
+    process.exit(1);
   }
 }
 

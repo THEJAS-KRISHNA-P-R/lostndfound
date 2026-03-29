@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Upload, X, AlertCircle, Loader2, ZoomIn } from 'lucide-react'
+import { Upload, X, AlertCircle, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { processAndUploadImage } from '@/actions/upload'
 import { Lightbox } from '@/components/ui/Lightbox'
@@ -22,7 +22,6 @@ export function ImageUpload({ maxFiles, bucket, onComplete, onDeleteImage, initi
   const [lightbox, setLightbox] = useState<{ open: boolean, index: number }>({ open: false, index: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const lastUrlsRef = useRef<string[]>([])
 
   // Initialize and sync previews from initialImages (e.g. after data fetch in edit mode)
   useEffect(() => {
@@ -35,6 +34,7 @@ export function ImageUpload({ maxFiles, bucket, onComplete, onDeleteImage, initi
         status: 'success'
       })))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialImages])
 
   // Sync successful URLs up to parent whenever previews change
@@ -43,11 +43,9 @@ export function ImageUpload({ maxFiles, bucket, onComplete, onDeleteImage, initi
       .filter(p => p.status === 'success' && p.remoteUrl)
       .map(p => p.remoteUrl!)
     
-    if (JSON.stringify(successful) !== JSON.stringify(lastUrlsRef.current)) {
-      lastUrlsRef.current = successful
-      onComplete(successful)
-    }
-  }, [previews, onComplete])
+    onComplete(successful)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previews.map(p => p.remoteUrl).join(',')])
 
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -75,8 +73,9 @@ export function ImageUpload({ maxFiles, bucket, onComplete, onDeleteImage, initi
         if (!res.success || !res.url) throw new Error(res.error || 'Upload failed')
 
         setPreviews(prev => prev.map(p => p.id === pId ? { ...p, remoteUrl: res.url, status: 'success' as const } : p))
-      } catch (e: any) {
-        setPreviews(prev => prev.map(p => p.id === pId ? { ...p, status: 'error' as const, error: e.message } : p))
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Upload failed'
+        setPreviews(prev => prev.map(p => p.id === pId ? { ...p, status: 'error' as const, error: message } : p))
       }
     }
     

@@ -29,13 +29,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setSession(session)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: unknown, session: unknown) => {
+      const s = session as { user: { id: string } } | null
+      if (s?.user) {
+        setSession(s as any) // Keep minimal cast to avoid store refactor now
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('id', s.user.id)
           .single()
         setProfile(profile as Profile)
       } else {

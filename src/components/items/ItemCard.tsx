@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, Clock, Pencil } from 'lucide-react'
+import { Clock, Pencil } from 'lucide-react'
 import { TypeBadge, StatusBadge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { formatRelative } from '@/utils/formatDate'

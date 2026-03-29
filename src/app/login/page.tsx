@@ -12,7 +12,6 @@ import { login } from '@/actions/auth'
 import { LoginSchema, type LoginInput } from '@/lib/validations/auth'
 import { PageShell } from '@/components/layout/PageShell'
 import { Button } from '@/components/ui/Button'
-import type { Metadata } from 'next'
 
 export default function LoginPage() {
   const router = useRouter()

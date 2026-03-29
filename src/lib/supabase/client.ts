@@ -11,7 +11,7 @@ export function createClient() {
 
   // @ts-expect-error - Attach strictly to window to survive Turbopack HMR re-evaluations
   if (!window.__supaClient) {
-    // @ts-expect-error
+    // @ts-expect-error - Singleton pattern for browser client
     window.__supaClient = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -31,6 +31,6 @@ export function createClient() {
     )
   }
 
-  // @ts-expect-error
+  // @ts-expect-error - Return the global singleton client
   return window.__supaClient
 }

@@ -2,17 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { Logo } from '@/components/ui/Logo'
-import { Home, Search, Plus, User, Bell, Menu, X, LogOut, Settings } from 'lucide-react'
+import { Home, Search, Plus, User, Bell, LogOut, Settings } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/hooks/useNotifications'
-import { useAuthStore } from '@/store/authStore'
 import { logout } from '@/actions/auth'
 import { Avatar } from '@/components/ui/Avatar'
 import { NotifBell } from '@/components/ui/NotifBell'
-import { Button } from '@/components/ui/Button'
 
 const navLinks = [
   { href: '/', label: 'Home', icon: Home },

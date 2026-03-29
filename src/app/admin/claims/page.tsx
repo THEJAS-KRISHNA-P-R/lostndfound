@@ -1,15 +1,14 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@/lib/supabase/server'
 import { ClaimReviewCard } from '@/components/admin/ClaimReviewCard'
 import type { Claim, Profile, Item } from '@/types'
 
-export const metadata: Metadata = { title: 'Admin — Claims' }
+export const metadata: Metadata = { title: 'Admin — Interaction Reviews' }
 
 type FullClaim = Claim & {
   profiles: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone' | 'uni_reg_no' | 'avatar_url'>
-  items: Pick<Item, 'id' | 'title' | 'type' | 'images' | 'status'>
+  items: Pick<Item, 'id' | 'title' | 'type' | 'images' | 'status' | 'private_details'>
 }
 
 export default async function AdminClaimsPage({
@@ -20,45 +19,41 @@ export default async function AdminClaimsPage({
   const sp = await searchParams
   const filterStatus = sp.status ?? 'pending'
 
+  // Auth check via regular client
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // Strict check on role to ensure admin status before fetching
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user?.id).single()
   if (profile?.role !== 'admin') {
-    return <div className="p-8 text-center text-red-500 font-medium tracking-tight">Access Denied: Admin privileges required.</div>
+    return <div className="p-8 text-center text-red-500 font-medium">Access Denied: Admin privileges required.</div>
   }
 
-  let query = supabase
-    .from('claims')
-    .select(`*, profiles:claimer_id(id, full_name, email, phone, uni_reg_no, avatar_url), items(id, title, type, images, status)`)
-    .order('created_at', { ascending: false })
-
-  if (filterStatus !== 'all') query = query.eq('status', filterStatus)
-
-  const { data, error } = await query.limit(50)
-  if (error) {
-    console.error('Admin Claims Fetch Error:', error)
-  }
-  
-  // High-privilege client to bypass RLS for generating signed URLs for proof images
-  const adminSupabase = await createServerClient(
+  // Service-role client — bypasses RLS to access private_details
+  const admin = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { cookies: { getAll: () => [], setAll: () => {} } }
   )
 
-  // Transform claims to include signed URLs for private proof images
+  let query = admin
+    .from('claims')
+    .select(`*, profiles:claimer_id(id, full_name, email, phone, uni_reg_no, avatar_url), items(id, title, type, images, status, private_details)`)
+    .order('created_at', { ascending: false })
+
+  if (filterStatus !== 'all') query = query.eq('status', filterStatus)
+
+  const { data, error } = await query.limit(50)
+  if (error) console.error('Admin Claims Fetch Error:', error)
+
+  // Generate signed URLs for proof images
   const rawClaims = (data as FullClaim[]) ?? []
   const claims = await Promise.all(rawClaims.map(async (claim) => {
     if (claim.proof_images && claim.proof_images.length > 0) {
-      const { data: signedData } = await adminSupabase.storage
+      const { data: signed } = await admin.storage
         .from('proof-images')
-        .createSignedUrls(claim.proof_images, 3600) // 1 hour expiry
-      
+        .createSignedUrls(claim.proof_images, 3600)
       return {
         ...claim,
-        proof_images: signedData?.map(d => d.signedUrl).filter(Boolean) as string[] ?? []
+        proof_images: signed?.map(d => d.signedUrl).filter(Boolean) as string[] ?? []
       }
     }
     return claim
@@ -86,11 +81,17 @@ export default async function AdminClaimsPage({
       {claims.length === 0 ? (
         <div className="flex flex-col items-center py-20 gap-3">
           <span className="text-4xl opacity-20">✅</span>
-          <p className="text-sm text-[var(--color-text-muted)]">No {filterStatus === 'all' ? '' : filterStatus} claims.</p>
+          <p className="text-sm text-[var(--color-text-muted)]">No {filterStatus === 'all' ? '' : filterStatus} submissions.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {claims.map(claim => <ClaimReviewCard key={claim.id} claim={claim} />)}
+          {claims.map(claim => (
+            <ClaimReviewCard
+              key={claim.id}
+              claim={claim}
+              privateDetails={claim.items?.private_details}
+            />
+          ))}
         </div>
       )}
     </div>

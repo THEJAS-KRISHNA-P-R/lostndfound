@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Lock, User, Calendar, MapPin, Clock, ArrowLeft } from 'lucide-react'
+import { Lock, Calendar, MapPin, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { formatFull, formatRelative } from '@/utils/formatDate'
 import type { Item, Profile, Category, Claim } from '@/types'
 import { ImageCarousel } from '@/components/items/ImageCarousel'
+import { HandoverPanel } from '@/components/items/HandoverPanel'
 
 type FullItem = Item & {
   profiles: Pick<Profile, 'id' | 'full_name' | 'avatar_url' | 'email'>
@@ -73,6 +74,18 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
       .eq('item_id', id)
       .order('created_at', { ascending: false })
     claims = (data as ClaimWithProfile[]) ?? []
+  }
+
+  // Get approved claim for handover panel (shown to both parties)
+  let approvedClaim: { id: string; poster_confirmed_at: string | null; claimer_confirmed_at: string | null; claimer_id: string } | null = null
+  if (user && typedItem.status === 'claimed') {
+    const { data } = await supabase
+      .from('claims')
+      .select('id, poster_confirmed_at, claimer_confirmed_at, claimer_id')
+      .eq('item_id', id)
+      .eq('status', 'approved')
+      .maybeSingle()
+    approvedClaim = data
   }
 
   return (
@@ -175,6 +188,16 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
                 <Button variant="outline" fullWidth>Sign in to claim this item</Button>
               </Link>
             )}
+
+            {/* Handover confirmation — shown after admin approval to both parties */}
+            {approvedClaim && (isOwner || user?.id === approvedClaim.claimer_id) && (
+              <HandoverPanel
+                claimId={approvedClaim.id}
+                isItemOwner={isOwner}
+                posterConfirmed={!!approvedClaim.poster_confirmed_at}
+                claimerConfirmed={!!approvedClaim.claimer_confirmed_at}
+              />
+            )}
           </div>
         </div>
 
@@ -188,7 +211,15 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
               {claims.map(claim => (
                 <div key={claim.id} className="bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-md)] p-4">
                   <div className="flex items-start gap-3">
-                    <Avatar src={claim.profiles?.avatar_url} fallback={claim.profiles?.full_name ?? 'U'} size={40} />
+                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+                      <Image 
+                        src={claim.profiles?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${claim.profiles?.full_name}`} 
+                        alt="Avatar" 
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-[var(--color-text-primary)]">{claim.profiles?.full_name}</span>

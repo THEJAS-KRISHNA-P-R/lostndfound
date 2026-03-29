@@ -70,8 +70,9 @@ export async function processAndUploadImage(formData: FormData): Promise<{ succe
 
     return { success: true, url: publicUrlData.publicUrl }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Image processing failed.'
     console.error('Sharp/Upload Error:', error)
-    return { success: false, error: error.message || 'Image processing failed.' }
+    return { success: false, error: message }
   }
 }

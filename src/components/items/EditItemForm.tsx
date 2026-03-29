@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 import { updateItem } from '@/actions/items'
@@ -34,7 +34,7 @@ export function EditItemForm({ item }: EditItemFormProps) {
   const [isPending, startTransition] = useTransition()
   const [deletedImages, setDeletedImages] = useState<string[]>([])
 
-  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       title: item.title,
       type: item.type,
@@ -47,6 +47,8 @@ export function EditItemForm({ item }: EditItemFormProps) {
       images: item.images || [],
     }
   })
+
+  const itemType = useWatch({ control, name: 'type' })
 
   const onSubmit = (data: FormData) => {
     startTransition(async () => {
@@ -90,7 +92,7 @@ export function EditItemForm({ item }: EditItemFormProps) {
                 key={t}
                 type="button"
                 onClick={() => setValue('type', t)}
-                className={`py-2 text-sm font-semibold rounded-[var(--radius-sm)] capitalize transition-all ${watch('type') === t ? 'bg-[var(--color-accent)] text-[#0D0F14]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
+                className={`py-2 text-sm font-semibold rounded-[var(--radius-sm)] capitalize transition-all ${itemType === t ? 'bg-[var(--color-accent)] text-[#0D0F14]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
               >
                 {t}
               </button>
@@ -135,7 +137,7 @@ export function EditItemForm({ item }: EditItemFormProps) {
 
             {/* Date */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Date {watch('type') === 'lost' ? 'Lost' : 'Found'}</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Date {itemType === 'lost' ? 'Lost' : 'Found'}</label>
               <input
                 type="date"
                 {...register('date_occurred', { required: 'Date is required' })}

@@ -12,7 +12,6 @@ import { register as registerAction } from '@/actions/auth'
 import { RegisterSchema, type RegisterInput } from '@/lib/validations/auth'
 import { PageShell } from '@/components/layout/PageShell'
 import { Button } from '@/components/ui/Button'
-import type { Metadata } from 'next'
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
