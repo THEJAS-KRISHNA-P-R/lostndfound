@@ -92,3 +92,22 @@ export async function markAllRead(): Promise<void> {
 
   revalidatePath('/notifications')
 }
+
+export async function getUnreadCount(): Promise<number> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('is_read', false)
+
+  if (error) {
+    console.error('🔔 [Action] getUnreadCount error:', error)
+    return 0
+  }
+
+  return count ?? 0
+}

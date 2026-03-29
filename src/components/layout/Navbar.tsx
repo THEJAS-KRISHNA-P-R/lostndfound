@@ -138,13 +138,16 @@ export function Navbar() {
               <Bell size={20} strokeWidth={pathname === '/notifications' ? 2.5 : 1.5} />
               {unreadCount > 0 && (
                 <span 
-                  className="absolute top-2 right-[calc(50%-14px)] w-3 h-3 rounded-full animate-pulse z-50 pointer-events-none" 
+                  className="absolute -top-1 right-[calc(50%-20px)] min-w-[1.1rem] h-4.5 px-1 rounded-full flex items-center justify-center text-[10px] font-bold text-white z-50 pointer-events-none" 
                   style={{ 
-                    background: '#FF9800', 
-                    boxShadow: '0 0 14px rgba(255, 152, 0, 0.7)',
-                    border: '2px solid var(--color-bg-surface)'
+                    background: '#EF4444', 
+                    boxShadow: '0 0 14px rgba(239, 68, 68, 0.6)',
+                    border: '1.5px solid var(--color-bg-surface)',
+                    transform: 'translate(25%, -25%)'
                   }}
-                />
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
               )}
               Notifs
             </Link>
