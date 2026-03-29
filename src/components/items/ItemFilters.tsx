@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ModeToggle } from './ModeToggle'
-import { FilterChip } from '@/components/ui/FilterChip'
 import { SearchBar } from '@/components/ui/SearchBar'
+import { Dropdown } from '@/components/ui/Dropdown'
 import { CATEGORIES } from '@/utils/constants'
 import { Suspense, useState, useEffect } from 'react'
 
@@ -31,16 +31,23 @@ function ItemFiltersInner() {
   }
 
   return (
-    <div className="space-y-3">
-      {/* Mode toggle + search */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <ModeToggle />
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search items..."
-          className="flex-1 sm:max-w-xs"
-        />
+    <div className="space-y-6">
+      {/* Tier 1: Primary Controls */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-4">
+        <div className="flex-none">
+          <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-1.5 ml-1">Type</span>
+          <ModeToggle />
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <span className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-1.5 ml-1">Search Database</span>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search titles, descriptions, IDs..."
+            className="w-full"
+          />
+        </div>
         <input
           className="sr-only"
           onKeyDown={handleSearchSubmit}
@@ -48,23 +55,44 @@ function ItemFiltersInner() {
           onChange={() => {}}
         />
       </div>
-      {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <FilterChip label="All" active={activeCategory === 'all'} onClick={() => update('category', 'all')} />
-        {CATEGORIES.map(cat => (
-          <FilterChip
-            key={cat}
-            label={cat}
-            active={activeCategory === cat}
-            onClick={() => update('category', cat)}
-          />
-        ))}
-      </div>
-      {/* Sort */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-[var(--color-text-muted)]">Sort:</span>
-        <FilterChip label="Latest" active={activeSort === 'latest'} onClick={() => update('sort', 'latest')} />
-        <FilterChip label="Oldest" active={activeSort === 'oldest'} onClick={() => update('sort', 'oldest')} />
+
+      {/* Tier 2: Refined Filters (Dropdowns) */}
+      <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-[var(--color-bg-border)]/50">
+        <Dropdown
+          label="Category"
+          value={activeCategory}
+          onChange={(val) => update('category', val)}
+          options={[
+            { label: 'All Categories', value: 'all' },
+            ...CATEGORIES.map(c => ({ label: c, value: c }))
+          ]}
+          className="w-full sm:w-[200px]"
+        />
+        
+        <Dropdown
+          label="Sort Order"
+          value={activeSort}
+          onChange={(val) => update('sort', val)}
+          options={[
+            { label: 'Latest First', value: 'latest' },
+            { label: 'Oldest First', value: 'oldest' },
+          ]}
+          className="w-full sm:w-[160px]"
+        />
+
+        {/* Active Filter Indicators (Optional cleanup button) */}
+        {(activeCategory !== 'all' || activeSort !== 'latest' || search) && (
+          <button 
+            onClick={() => {
+              setSearch('')
+              const params = new URLSearchParams()
+              router.push('/browse', { scroll: false })
+            }}
+            className="mt-4 sm:mt-0 text-[11px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors"
+          >
+            Clear all filters
+          </button>
+        )}
       </div>
     </div>
   )

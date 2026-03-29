@@ -60,13 +60,18 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     <PageShell>
       <div className="flex flex-col min-h-screen">
         <Navbar />
-        <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 pb-24 md:pb-8">
-          <div className="mb-8">
-            <h1 className="font-[var(--font-display)] text-3xl text-[var(--color-text-primary)] mb-2">Browse Items</h1>
-            <p className="text-[var(--color-text-muted)] text-sm">{items.length} item{items.length !== 1 ? 's' : ''} found</p>
+        <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-12 pb-24 md:pb-12">
+          <div className="mb-12 text-center">
+            <h1 className="font-[var(--font-display)] text-4xl md:text-5xl text-[var(--color-text-primary)] mb-3 tracking-tight">
+              Browse <span className="text-[var(--color-accent)]">Database</span>
+            </h1>
+            <div className="h-1 w-24 bg-[var(--color-accent)] mx-auto rounded-full mb-4 opacity-80" />
+            <p className="text-[var(--color-text-muted)] text-sm font-medium tracking-wide uppercase">
+              {items.length} item{items.length !== 1 ? 's' : ''} discovered
+            </p>
           </div>
           {/* Filters — Client Component */}
-          <div className="mb-6">
+          <div className="mb-12">
             <ItemFilters />
           </div>
           {/* Grid — Server Component data */}

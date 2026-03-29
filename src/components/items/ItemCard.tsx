@@ -23,7 +23,7 @@ export function ItemCard({ item, editable }: ItemCardProps) {
   const username = item.profiles?.full_name ?? 'Anonymous'
 
   return (
-    <div className="group/card flex flex-col h-full bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-md)] overflow-hidden transition-all duration-200 hover:border-[var(--color-accent)] hover:shadow-[0_4px_24px_rgba(245,166,35,0.10)] hover:-translate-y-0.5">
+    <div className="group/card flex flex-col h-full bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-lg)] overflow-hidden transition-all duration-300 hover:border-[var(--color-accent)] hover:shadow-[0_8px_32px_rgba(245,166,35,0.15),0_0_12px_rgba(245,166,35,0.1)] hover:-translate-y-1">
       {/* Image Area - Link to Detail */}
       <Link href={`/items/${item.id}`} className="aspect-square relative overflow-hidden bg-[var(--color-bg-elevated)] block">
         {thumbnail ? (
