@@ -49,7 +49,7 @@ export function ClaimReviewCard({ claim, privateDetails }: { claim: FullClaim; p
         <div className="flex items-start gap-3 p-4 border-b border-[var(--color-bg-border)]">
           <div className="relative w-14 h-14 shrink-0 rounded-[var(--radius-sm)] overflow-hidden bg-[var(--color-bg-elevated)]">
             {claim.items?.images?.[0]
-              ? <Image src={claim.items.images[0]} alt={claim.items.title} fill className="object-cover" />
+              ? <Image src={claim.items.images[0]} alt={claim.items.title} fill sizes="80px" className="object-cover" />
               : <span className="absolute inset-0 flex items-center justify-center text-xl opacity-20">📦</span>}
           </div>
           <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ export function ClaimReviewCard({ claim, privateDetails }: { claim: FullClaim; p
               <div className="flex gap-2">
                 {claim.proof_images.map((img, i) => (
                   <div key={i} className="relative w-20 h-20 rounded-[var(--radius-sm)] overflow-hidden border border-[var(--color-bg-border)]">
-                    <Image src={img} alt={`Proof ${i + 1}`} fill className="object-cover" />
+                    <Image src={img} alt={`Proof ${i + 1}`} fill sizes="200px" className="object-cover" />
                   </div>
                 ))}
               </div>

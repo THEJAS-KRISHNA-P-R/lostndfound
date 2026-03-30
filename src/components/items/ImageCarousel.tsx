@@ -91,10 +91,10 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
               src={images[currentIndex]}
               alt={`${title} - Image ${currentIndex + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
               className="object-cover pointer-events-none"
               priority={currentIndex === 0}
               quality={100}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
             />
           </motion.div>
         </AnimatePresence>
@@ -176,7 +176,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
                   : 'border-transparent opacity-60 hover:opacity-100'
               }`}
             >
-              <Image src={img} alt={`Thumbnail ${i + 1}`} fill className="object-cover" />
+              <Image src={img} alt={`Thumbnail ${i + 1}`} fill sizes="80px" className="object-cover" />
             </button>
           ))}
         </div>

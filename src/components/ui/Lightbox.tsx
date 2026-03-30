@@ -103,10 +103,10 @@ export function Lightbox({ open, onClose, images, currentIndex, onNavigate }: Li
               src={images[currentIndex]}
               alt={`Full-screen view ${currentIndex + 1}`}
               fill
+              sizes="100vw"
               className="object-contain"
               priority
               quality={100}
-              sizes="100vw"
             />
           </motion.div>
 

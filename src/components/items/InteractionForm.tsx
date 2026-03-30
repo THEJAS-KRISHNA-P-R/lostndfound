@@ -82,7 +82,7 @@ export function InteractionForm({ item }: InteractionFormProps) {
         {/* Item summary */}
         <div className="flex gap-3 bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-md)] p-3 mb-6">
           <div className="relative w-16 h-16 rounded-[var(--radius-sm)] overflow-hidden bg-[var(--color-bg-elevated)] shrink-0">
-            {item.images?.[0] ? <Image src={item.images[0]} alt={item.title} fill className="object-cover" /> : <span className="absolute inset-0 flex items-center justify-center text-2xl opacity-20">📦</span>}
+            {item.images?.[0] ? <Image src={item.images[0]} alt={item.title} fill sizes="64px" className="object-cover" /> : <span className="absolute inset-0 flex items-center justify-center text-2xl opacity-20">📦</span>}
           </div>
           <div className="min-w-0">
             <TypeBadge type={item.type} />

@@ -89,7 +89,7 @@ export default function PostItemPage() {
               onClick={() => setItemType(t)}
               className={`flex-1 py-2 text-sm font-medium rounded-[calc(var(--radius-xl)-4px)] transition-all duration-200 ${itemType === t ? 'bg-[var(--color-accent)] text-[#0D0F14] font-semibold' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
             >
-              {t === 'found' ? '🙌 I Found Something' : '😟 I Lost Something'}
+              {t === 'found' ? 'I Found Something' : 'I Lost Something'}
             </button>
           ))}
         </div>

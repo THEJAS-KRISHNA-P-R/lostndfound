@@ -38,14 +38,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/logos/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/logos/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
     ],
     apple: [
-      { url: '/logos/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
-  manifest: '/logos/site.webmanifest',
+  manifest: '/site.webmanifest',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               fontSize: '14px',
             },
             success: {
-              iconTheme: { primary: '#F5A623', secondary: '#0D0F14' },
+              iconTheme: { primary: ' #F97316', secondary: '#0D0F14' },
             },
             error: {
               iconTheme: { primary: '#EF4444', secondary: '#0D0F14' },

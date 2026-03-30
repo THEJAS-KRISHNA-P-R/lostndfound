@@ -129,6 +129,7 @@ export function ImageUpload({ maxFiles, bucket, onComplete, onDeleteImage, initi
                 src={p.localUrl} 
                 alt={p.name} 
                 fill 
+                sizes="48px"
                 className={`object-cover transition-opacity ${p.status === 'uploading' ? 'opacity-50 grayscale' : 'opacity-100'}`} 
               />
               
