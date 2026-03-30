@@ -72,7 +72,7 @@ export type Notification = {
   sender_id?: string
   title: string
   message: string
-  type: 'info' | 'success' | 'warning' | 'claim_approved' | 'claim_rejected' | 'contact_shared'
+  type: 'info' | 'success' | 'warning' | 'claim_approved' | 'claim_rejected' | 'contact_shared' | 'match_found'
   is_read: boolean
   metadata?: {
     name?: string
@@ -80,6 +80,8 @@ export type Notification = {
     phone?: string
     admin_note?: string
     item_title?: string
+    item_id?: string
+    lost_item_title?: string
   }
   created_at: string
 }

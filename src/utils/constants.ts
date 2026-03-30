@@ -32,6 +32,7 @@ export const NOTIF_ICONS: Record<string, string> = {
   claim_approved:  'check-circle',
   claim_rejected:  'x-circle',
   contact_shared:  'user-check',
+  match_found:     'search',
 }
 
 export const ITEM_PLACEHOLDER = '/placeholder-item.svg'
