@@ -9,13 +9,14 @@ interface ModalProps {
   title?: string
   children: React.ReactNode
   maxWidth?: string
+  closable?: boolean
 }
 
-export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md' }: ModalProps) {
+export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md', closable = true }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!open) return
+    if (!open || !closable) return
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
     document.body.style.overflow = 'hidden'
@@ -23,7 +24,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md' }:
       document.removeEventListener('keydown', handler)
       document.body.style.overflow = ''
     }
-  }, [open, onClose])
+  }, [open, onClose, closable])
 
   if (!open) return null
 
@@ -32,7 +33,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md' }:
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={closable ? onClose : undefined}
         aria-hidden
       />
       {/* Panel */}
@@ -48,12 +49,14 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md' }:
             <h2 className="text-base font-semibold text-[var(--color-text-primary)] font-[var(--font-display)]">
               {title}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors rounded p-1"
-            >
-              <X size={18} />
-            </button>
+            {closable && (
+              <button
+                onClick={onClose}
+                className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors rounded p-1"
+              >
+                <X size={18} />
+              </button>
+            )}
           </div>
         )}
         <div className="p-6">{children}</div>

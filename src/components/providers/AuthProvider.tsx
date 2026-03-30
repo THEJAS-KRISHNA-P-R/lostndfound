@@ -6,6 +6,8 @@ import { useAuthStore } from '@/store/authStore'
 import type { Profile } from '@/types'
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js'
 
+import { CompleteProfileModal } from '@/components/auth/CompleteProfileModal'
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setProfile, setSession, setInitialized, clear } = useAuthStore()
 
@@ -48,5 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [setProfile, setSession, setInitialized, clear])
 
-  return <>{children}</>
+  return (
+    <>
+      <CompleteProfileModal />
+      {children}
+    </>
+  )
 }

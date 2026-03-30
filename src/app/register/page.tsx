@@ -8,7 +8,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
-import { register as registerAction } from '@/actions/auth'
+import { register as signUpAction, signInWithGoogle } from '@/actions/auth'
+import { GoogleIcon } from '@/components/ui/GoogleIcon'
 import { RegisterSchema, type RegisterInput } from '@/lib/validations/auth'
 import { PageShell } from '@/components/layout/PageShell'
 import { Button } from '@/components/ui/Button'
@@ -45,7 +46,7 @@ export default function RegisterPage() {
     const fd = new FormData()
     Object.entries(data).forEach(([k, v]) => fd.append(k, v ?? ''))
     startTransition(async () => {
-      const result = await registerAction(fd)
+      const result = await signUpAction(fd)
       if (result.success) {
         toast.success('Account created! Check your email to verify.')
         router.push('/login')
@@ -96,6 +97,31 @@ export default function RegisterPage() {
               Create Account
             </Button>
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-[var(--color-bg-border)]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[var(--color-bg-surface)] px-2 text-[var(--color-text-muted)]">Or continue with</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="secondary"
+            fullWidth
+            onClick={async () => {
+              const res = await signInWithGoogle()
+              if (res.success && res.data?.url) {
+                window.location.href = res.data.url
+              } else {
+                toast.error(res.error ?? 'Failed to start Google sign-in')
+              }
+            }}
+          >
+            <GoogleIcon /> Google
+          </Button>
         </div>
 
         <p className="text-center text-sm text-[var(--color-text-muted)] mt-6">

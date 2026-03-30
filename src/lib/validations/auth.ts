@@ -21,5 +21,11 @@ export const RegisterSchema = z.object({
   path: ['confirmPassword'],
 })
 
+export const CompleteProfileSchema = z.object({
+  uni_reg_no: z.string().min(3, 'University registration number is required'),
+  phone: z.string().min(7, 'Please enter a valid phone number').optional().or(z.literal('')),
+})
+
 export type LoginInput = z.infer<typeof LoginSchema>
 export type RegisterInput = z.infer<typeof RegisterSchema>
+export type CompleteProfileInput = z.infer<typeof CompleteProfileSchema>

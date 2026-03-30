@@ -64,3 +64,41 @@ export async function logout(): Promise<void> {
   await supabase.auth.signOut()
   redirect('/')
 }
+
+export async function signInWithGoogle(): Promise<ActionResult<{ url: string | null }>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+    },
+  })
+  
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: { url: data.url } }
+}
+
+export async function updateProfile(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
+
+  const uni_reg_no = formData.get('uni_reg_no') as string
+  const phone = formData.get('phone') as string
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ 
+      uni_reg_no, 
+      phone: phone || null 
+    })
+    .eq('id', user.id)
+
+  if (error) {
+    if (error.code === '23505') return { success: false, error: 'This registration number is already in use.' }
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/', 'layout')
+  return { success: true }
+}
