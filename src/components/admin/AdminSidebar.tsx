@@ -18,7 +18,7 @@ const navItems = [
 
 export function AdminSidebar({ pendingClaimsCount }: { pendingClaimsCount: number }) {
   const pathname = usePathname()
-  const { profile } = useAuth()
+  const { profile, session } = useAuth()
 
   return (
     <>
@@ -59,10 +59,10 @@ export function AdminSidebar({ pendingClaimsCount }: { pendingClaimsCount: numbe
         {/* Bottom — profile + logout */}
         <div className="p-3 border-t border-[var(--color-bg-border)]">
           <div className="flex items-center gap-3 px-3 py-2 mb-1">
-            <Avatar src={profile?.avatar_url} fallback={profile?.full_name ?? 'A'} size={32} />
+            <Avatar src={profile?.avatar_url} fallback={profile?.email ?? session?.user?.email ?? 'A'} size={32} />
             <div className="min-w-0">
-              <p className="text-xs font-medium text-[var(--color-text-primary)] truncate">{profile?.full_name}</p>
-              <p className="text-[10px] text-[var(--color-text-muted)] truncate">{profile?.email}</p>
+              <p className="text-xs font-medium text-[var(--color-text-primary)] truncate">{profile?.full_name ?? 'Admin'}</p>
+              <p className="text-[10px] text-[var(--color-text-muted)] truncate">{profile?.email ?? session?.user?.email}</p>
             </div>
           </div>
           <form action={logout}>

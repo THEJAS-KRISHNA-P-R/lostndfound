@@ -19,7 +19,7 @@ const navLinks = [
 ]
 
 export function Navbar() {
-  const { isAuthed, isAdmin, profile } = useAuth()
+  const { isAuthed, isAdmin, profile, session } = useAuth()
   const { unreadCount } = useNotifications(profile?.id)
   const pathname = usePathname()
   const router = useRouter()
@@ -73,15 +73,15 @@ export function Navbar() {
               {/* Avatar dropdown trigger */}
               <div className="relative">
                 <button onClick={() => setMenuOpen(v => !v)} className="rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-base)]">
-                  <Avatar src={profile?.avatar_url} fallback={profile?.full_name ?? 'U'} size={32} />
+                  <Avatar src={profile?.avatar_url} fallback={profile?.email ?? session?.user?.email ?? 'U'} size={32} />
                 </button>
                 {menuOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                     <div className="absolute right-0 mt-2 w-48 bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-md)] shadow-xl z-20 py-1">
                       <div className="px-4 py-2 border-b border-[var(--color-bg-border)]">
-                        <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{profile?.full_name}</p>
-                        <p className="text-xs text-[var(--color-text-muted)] truncate">{profile?.email}</p>
+                         <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{profile?.full_name ?? 'User'}</p>
+                        <p className="text-xs text-[var(--color-text-muted)] truncate">{profile?.email ?? session?.user?.email}</p>
                       </div>
                       <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-border)]">
                         <Settings size={14} /> Profile

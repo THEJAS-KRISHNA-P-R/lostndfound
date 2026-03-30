@@ -63,7 +63,7 @@ export default async function ProfilePage({
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 md:px-8 py-8 pb-24 md:pb-8">
           {/* Profile header */}
           <div className="flex items-start gap-4 mb-8 p-5 bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-lg)]">
-            <Avatar src={(profile as Profile).avatar_url} fallback={(profile as Profile).full_name} size={64} />
+            <Avatar src={(profile as Profile).avatar_url} fallback={(profile as Profile).email} size={64} />
             <div className="flex-1 min-w-0">
               <h1 className="font-[var(--font-display)] text-2xl text-[var(--color-text-primary)]">{(profile as Profile).full_name}</h1>
               <p className="text-sm text-[var(--color-text-muted)]">{(profile as Profile).email}</p>

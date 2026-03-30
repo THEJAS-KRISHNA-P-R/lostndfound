@@ -7,12 +7,14 @@ type AvatarProps = {
 }
 
 export function Avatar({ src, fallback = '?', size = 32 }: AvatarProps) {
-  const initials = fallback
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
+  const initials = fallback.includes('@')
+    ? fallback[0].toUpperCase()
+    : fallback
+        .split(' ')
+        .map(w => w[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
 
   if (src) {
     return (
