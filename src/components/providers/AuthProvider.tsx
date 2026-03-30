@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/authStore'
 import type { Profile } from '@/types'
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setProfile, setSession, setInitialized, clear } = useAuthStore()
@@ -29,14 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: unknown, session: unknown) => {
-      const s = session as { user: { id: string } } | null
-      if (s?.user) {
-        setSession(s as any) // Keep minimal cast to avoid store refactor now
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+      if (session?.user) {
+        setSession(session)
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', s.user.id)
+          .eq('id', session.user.id)
           .single()
         setProfile(profile as Profile)
       } else {
