@@ -1,12 +1,15 @@
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
 import { ArrowRight, MapPin, Shield, Zap } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
-import { Footer } from '@/components/layout/Footer'
-import { ItemGrid } from '@/components/items/ItemGrid'
-import type { PublicItem, Profile, Category } from '@/types'
-import type { Metadata } from 'next'
 import { MagicRingsClient } from '@/components/ui/MagicRingsClient'
+import { RecentItemsSection } from '@/components/home/RecentItemsSection'
+import { Skeleton, ItemGridSkeleton } from '@/components/ui/Skeleton'
+import type { Metadata } from 'next'
+
+// Lazy load footer for better TTI
+const Footer = dynamic(() => import('@/components/layout/Footer').then(mod => mod.Footer))
 
 export const metadata: Metadata = {
   title: "LOFO — Find What's Yours",
@@ -19,20 +22,7 @@ const features = [
   { icon: Zap, title: 'Post in Seconds', desc: 'Snap a photo, add a description, and post instantly from any device.' },
 ]
 
-async function getRecentItems(): Promise<(PublicItem & { profiles?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>; categories?: Pick<Category, 'id' | 'name'> })[]> {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('public_items')
-    .select(`*, profiles(id, full_name, avatar_url), categories(id, name)`)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(6)
-  return (data as (PublicItem & { profiles?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>; categories?: Pick<Category, 'id' | 'name'> })[]) ?? []
-}
-
-export default async function LandingPage() {
-  const recentItems = await getRecentItems()
-
+export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -62,14 +52,14 @@ export default async function LandingPage() {
 
         {/* Hero content */}
         <div className="relative z-10 text-center px-4 max-w-2xl mx-auto">
-          <h1 className="font-[var(--font-display)] text-5xl md:text-7xl text-[var(--color-text-primary)] leading-tight mb-6">
+          <h1 className="font-[var(--font-display)] text-5xl md:text-7xl text-[var(--color-text-primary)] leading-tight mb-6 tracking-tight">
             Lost something?
             <br />
             <span className="text-[var(--color-accent)]">We&apos;ll find it.</span>
           </h1>
-          <p className="text-[var(--color-text-secondary)] text-lg md:text-xl mb-10 leading-relaxed">
+          <p className="text-[var(--color-text-secondary)] text-lg md:text-xl mb-10 leading-relaxed max-w-xl mx-auto">
             LOFO is your campus lost &amp; found — post items you&apos;ve found, report what you&apos;ve lost,
-            and let your community help reunite people with their belongings.
+            and let your community help reunite belongings.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -111,20 +101,20 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Recent Items ── */}
-      {recentItems.length > 0 && (
+      {/* ── Recent Items (STREAMED) ── */}
+      <Suspense fallback={
         <section className="py-20 px-4 md:px-8">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="font-[var(--font-display)] text-3xl text-[var(--color-text-primary)]">Recently Posted</h2>
-              <Link href="/browse" className="text-sm text-[var(--color-accent)] hover:underline inline-flex items-center gap-1">
-                View all <ArrowRight size={14} />
-              </Link>
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-24" />
             </div>
-            <ItemGrid items={recentItems} />
+            <ItemGridSkeleton />
           </div>
         </section>
-      )}
+      }>
+        <RecentItemsSection />
+      </Suspense>
 
       <Footer />
     </div>

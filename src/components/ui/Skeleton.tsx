@@ -1,48 +1,39 @@
-type SkeletonVariant = 'card' | 'text' | 'avatar' | 'row'
-
-interface SkeletonProps {
-  variant?: SkeletonVariant
-  count?: number
-  className?: string
-}
-
-function SkeletonItem({ variant, className }: { variant: SkeletonVariant; className?: string }) {
-  if (variant === 'card') {
-    return (
-      <div className="rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-bg-border)]">
-        <div className="skeleton aspect-square w-full" />
-        <div className="p-3 space-y-2">
-          <div className="skeleton h-4 rounded-full w-3/4" />
-          <div className="skeleton h-3 rounded-full w-full" />
-          <div className="skeleton h-3 rounded-full w-1/2" />
-        </div>
-      </div>
-    )
-  }
-  if (variant === 'avatar') {
-    return <div className={`skeleton rounded-full w-8 h-8 ${className}`} />
-  }
-  if (variant === 'row') {
-    return (
-      <div className="flex items-center gap-3 p-4 border-b border-[var(--color-bg-border)]">
-        <div className="skeleton rounded-full w-10 h-10 shrink-0" />
-        <div className="flex-1 space-y-2">
-          <div className="skeleton h-4 rounded-full w-1/3" />
-          <div className="skeleton h-3 rounded-full w-2/3" />
-        </div>
-        <div className="skeleton h-6 rounded-full w-16" />
-      </div>
-    )
-  }
-  return <div className={`skeleton h-4 rounded-full w-full ${className}`} />
-}
-
-export function Skeleton({ variant = 'text', count = 1, className }: SkeletonProps) {
+export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <>
+    <div
+      className={`animate-pulse rounded bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] ${className || ""}`}
+      {...props}
+    />
+  )
+}
+
+export function ItemCardSkeleton() {
+  return (
+    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-lg)] overflow-hidden h-full flex flex-col">
+      <Skeleton className="aspect-square w-full" />
+      <div className="p-4 flex-1 flex flex-col gap-3">
+        <div className="flex justify-between items-start">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-1/4 rounded-full" />
+        </div>
+        <Skeleton className="h-6 w-3/4" />
+        <div className="space-y-2 mt-auto">
+          <div className="flex items-center gap-2 pt-3 border-t border-[var(--color-bg-border)]">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function ItemGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: count }).map((_, i) => (
-        <SkeletonItem key={i} variant={variant} className={className} />
+        <ItemCardSkeleton key={i} />
       ))}
-    </>
+    </div>
   )
 }
