@@ -32,7 +32,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md', c
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={closable ? onClose : undefined}
         aria-hidden
       />
@@ -42,7 +42,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md', c
         role="dialog"
         aria-modal
         aria-label={title}
-        className={`relative z-10 w-full ${maxWidth} bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-lg)] shadow-2xl animate-[fadeIn_0.2s_ease]`}
+        className={`relative z-10 w-full ${maxWidth} bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-lg)] shadow-2xl modal-enter`}
       >
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-bg-border)]">

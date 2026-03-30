@@ -14,6 +14,8 @@ import { formatFull, formatRelative } from '@/utils/formatDate'
 import type { Item, Profile, Category, Claim } from '@/types'
 import { ImageCarousel } from '@/components/items/ImageCarousel'
 import { HandoverPanel } from '@/components/items/HandoverPanel'
+import { AdminActions } from '@/components/items/AdminActions'
+import { DeleteItemButton } from '@/components/items/DeleteItemButton'
 
 type FullItem = Item & {
   profiles: Pick<Profile, 'id' | 'full_name' | 'avatar_url' | 'email'>
@@ -167,9 +169,17 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
 
             {/* Edit / Claim button */}
             {isOwner && typedItem.status === 'active' && (
-              <Link href={`/edit/${typedItem.id}`}>
-                <Button variant="outline" fullWidth size="lg">Edit Post</Button>
-              </Link>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <Link href={`/edit/${typedItem.id}`} className="w-full">
+                  <Button fullWidth size="lg">Edit Post</Button>
+                </Link>
+                <DeleteItemButton itemId={typedItem.id} title={typedItem.title} />
+              </div>
+            )}
+            
+            {/* Admin Command Center */}
+            {!isOwner && isAdmin && (
+              <AdminActions itemId={typedItem.id} itemTitle={typedItem.title} />
             )}
             {canClaim && (
               <Link href={typedItem.type === 'found' ? `/claim/${typedItem.id}` : `/report-found/${typedItem.id}`}>
@@ -185,7 +195,9 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
             )}
             {!user && typedItem.status === 'active' && (
               <Link href={`/login?next=/items/${id}`}>
-                <Button variant="outline" fullWidth>Sign in to claim this item</Button>
+                <Button variant="outline" fullWidth>
+                  {typedItem.type === 'found' ? 'Sign in to claim this item' : "Sign in: I've found this"}
+                </Button>
               </Link>
             )}
 

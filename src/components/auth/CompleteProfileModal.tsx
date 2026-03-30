@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
@@ -15,15 +15,26 @@ export function CompleteProfileModal() {
   const [isPending, startTransition] = useTransition()
 
   // Only show if user is authenticated and UNI Reg No is missing or 'PENDING'
-  const isMissingData = isAuthed && (!profile?.uni_reg_no || profile?.uni_reg_no === 'PENDING')
+  // We check 'initialized' to avoid flicker on first load
+  const isMissingData = isAuthed && initialized && (!profile?.uni_reg_no || profile?.uni_reg_no === 'PENDING')
   
-  const { register, handleSubmit, formState: { errors } } = useForm<CompleteProfileInput>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CompleteProfileInput>({
     resolver: zodResolver(CompleteProfileSchema),
     defaultValues: {
-      uni_reg_no: profile?.uni_reg_no === 'PENDING' ? '' : profile?.uni_reg_no,
+      uni_reg_no: profile?.uni_reg_no === 'PENDING' ? '' : (profile?.uni_reg_no ?? ''),
       phone: profile?.phone ?? '',
     }
   })
+
+  // Sync form defaults when profile loads (handles the jump after Google OAuth redirect)
+  useEffect(() => {
+    if (profile) {
+      reset({
+        uni_reg_no: profile.uni_reg_no === 'PENDING' ? '' : profile.uni_reg_no,
+        phone: profile.phone ?? '',
+      })
+    }
+  }, [profile, reset])
 
   const onSubmit = (data: CompleteProfileInput) => {
     const fd = new FormData()
@@ -31,21 +42,25 @@ export function CompleteProfileModal() {
     fd.append('phone', data.phone ?? '')
 
     startTransition(async () => {
-      const result = await updateProfile(fd)
-      if (result.success) {
-        toast.success('Profile completed! Welcome aboard.')
-      } else {
-        toast.error(result.error ?? 'Something went wrong.')
+      try {
+        const result = await updateProfile(fd)
+        if (result.success) {
+          toast.success('Profile completed! Welcome aboard.')
+        } else {
+          toast.error(result.error ?? 'Something went wrong.')
+        }
+      } catch {
+        toast.error('Something went wrong. Please try again.')
       }
     })
   }
 
-  if (!initialized || !isMissingData) return null
+  if (!isMissingData) return null
 
   return (
     <Modal
       open={true}
-      onClose={() => {}} // Unused since closable={false}
+      onClose={() => {}} 
       closable={false}
       title="Complete your profile"
       maxWidth="max-w-md"

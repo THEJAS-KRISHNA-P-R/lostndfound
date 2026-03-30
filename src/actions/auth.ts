@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { LoginSchema, RegisterSchema } from '@/lib/validations/auth'
+import { LoginSchema, RegisterSchema, CompleteProfileSchema } from '@/lib/validations/auth'
 import type { ActionResult } from '@/types'
 
 export async function login(formData: FormData): Promise<ActionResult<{ role: string }>> {
@@ -62,7 +62,7 @@ export async function register(formData: FormData): Promise<ActionResult> {
 export async function logout(): Promise<void> {
   const supabase = await createClient()
   await supabase.auth.signOut()
-  redirect('/')
+  redirect('/login')
 }
 
 export async function signInWithGoogle(): Promise<ActionResult<{ url: string | null }>> {
@@ -83,8 +83,14 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
 
-  const uni_reg_no = formData.get('uni_reg_no') as string
-  const phone = formData.get('phone') as string
+  const raw = { 
+    uni_reg_no: formData.get('uni_reg_no'), 
+    phone: formData.get('phone') || undefined 
+  }
+  const parsed = CompleteProfileSchema.safeParse(raw)
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
+
+  const { uni_reg_no, phone } = parsed.data
 
   const { error } = await supabase
     .from('profiles')

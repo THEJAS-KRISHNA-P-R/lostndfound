@@ -15,19 +15,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient()
 
     async function init() {
-      const { data: { session } } = await supabase.auth.getSession()
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
 
-      if (session?.user) {
-        setSession(session)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-        setProfile(profile as Profile)
+        if (session?.user) {
+          setSession(session)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+          setProfile(profile as Profile)
+        }
+      } catch (err) {
+        console.error('Error in AuthProvider init:', err)
+      } finally {
+        setInitialized(true)
       }
-
-      setInitialized(true)
     }
 
     init()

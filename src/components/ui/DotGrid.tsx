@@ -43,22 +43,31 @@ export interface DotGridProps {
 }
 
 function hexToRgb(hex: string) {
-  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i)
-  if (!m) return { r: 0, g: 0, b: 0 }
-  return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
+  const cleanHex = hex.replace('#', '')
+  if (cleanHex.length === 3) {
+    const r = parseInt(cleanHex[0] + cleanHex[0], 16)
+    const g = parseInt(cleanHex[1] + cleanHex[1], 16)
+    const b = parseInt(cleanHex[2] + cleanHex[2], 16)
+    return { r, g, b }
+  }
+  const r = parseInt(cleanHex.substring(0, 2), 16)
+  const g = parseInt(cleanHex.substring(2, 4), 16)
+  const b = parseInt(cleanHex.substring(4, 6), 16)
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return { r: 0, g: 0, b: 0 }
+  return { r, g, b }
 }
 
 export function DotGrid({
-  dotSize = 16,
-  gap = 32,
-  baseColor = '#2A2D37',
-  activeColor = '#F5A623',
-  proximity = 150,
+  dotSize = 4,
+  gap = 40,
+  baseColor = '#6b738aff',
+  activeColor = '#ff6600ff',
+  proximity = 100,
   speedTrigger = 100,
-  shockRadius = 250,
+  shockRadius = 180,
   shockStrength = 5,
   maxSpeed = 5000,
-  resistance = 750,
+  resistance = 500,
   returnDuration = 1.5,
   className = '',
   style,

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
+import { DotGrid } from '@/components/ui/DotGrid'
 import { ArrowRight, MapPin, Shield, Zap } from 'lucide-react'
 import { Navbar } from '@/components/layout/Navbar'
 import { MagicRingsClient } from '@/components/ui/MagicRingsClient'
@@ -79,8 +80,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="py-20 px-4 md:px-8 bg-[var(--color-bg-surface)]">
-        <div className="max-w-5xl mx-auto">
+      <section className="relative py-20 px-4 md:px-8 bg-[var(--color-bg-surface)] overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+          <DotGrid className="w-full h-full" />
+        </div>
+        <div className="relative z-10 max-w-5xl mx-auto">
           <h2 className="font-[var(--font-display)] text-3xl text-center text-[var(--color-text-primary)] mb-12">
             How LOFO works
           </h2>
@@ -102,19 +106,24 @@ export default function LandingPage() {
       </section>
 
       {/* ── Recent Items (STREAMED) ── */}
-      <Suspense fallback={
-        <section className="py-20 px-4 md:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-24" />
+      <section className="relative py-20 px-4 md:px-8 overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+          <DotGrid className="w-full h-full" />
+        </div>
+        <div className="relative z-10">
+          <Suspense fallback={
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <ItemGridSkeleton />
             </div>
-            <ItemGridSkeleton />
-          </div>
-        </section>
-      }>
-        <RecentItemsSection />
-      </Suspense>
+          }>
+            <RecentItemsSection />
+          </Suspense>
+        </div>
+      </section>
 
       <Footer />
     </div>

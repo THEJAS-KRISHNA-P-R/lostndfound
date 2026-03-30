@@ -7,6 +7,7 @@ import { TypeBadge, StatusBadge } from '@/components/ui/Badge'
 import { Avatar } from '@/components/ui/Avatar'
 import { formatRelative } from '@/utils/formatDate'
 import type { PublicItem, Profile, Category } from '@/types'
+import { DeleteItemButton } from './DeleteItemButton'
 
 type ItemWithRelations = PublicItem & {
   profiles?: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>
@@ -49,16 +50,17 @@ export function ItemCard({ item, editable }: ItemCardProps) {
         )}
       </Link>
 
-      {/* Edit Button - Dedicated space between Image and Content if editable */}
+      {/* Edit/Delete Buttons - Dedicated space between Image and Content if editable */}
       {editable && item.status === 'active' && (
-        <div className="px-3 pt-3">
-          <Link 
+        <div className="px-3 pt-3 grid grid-cols-2 gap-2">
+          <Link
             href={`/edit/${item.id}`}
-            className="flex items-center justify-center gap-2 w-full py-2 bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-sm)] text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-primary)] hover:bg-[var(--color-accent)] hover:text-[#0D0F14] hover:border-[var(--color-accent)] transition-all shadow-sm"
+            className="flex items-center justify-center gap-2 py-2 bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-sm)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-primary)] hover:bg-[var(--color-accent)] hover:text-[#0D0F14] hover:border-[var(--color-accent)] transition-all shadow-sm"
           >
-            <Pencil size={12} />
-            Edit Post
+            <Pencil size={11} />
+            Edit
           </Link>
+          <DeleteItemButton itemId={item.id} title={item.title} isCompact />
         </div>
       )}
 

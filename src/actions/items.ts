@@ -27,6 +27,17 @@ export async function createItem(formData: FormData): Promise<ActionResult<{ id:
   const parsed = PostItemSchema.safeParse(raw)
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
+  // Strict profile completeness check — prevent bypasses
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('uni_reg_no')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !profile.uni_reg_no || profile.uni_reg_no === 'PENDING') {
+    return { success: false, error: 'Please update your profile with your University Registration Number before posting items.' }
+  }
+
   const { data, error } = await supabase
     .from('items')
     .insert({ ...parsed.data, user_id: user.id })

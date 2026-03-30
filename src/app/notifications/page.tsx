@@ -55,7 +55,7 @@ export default async function NotificationsPage() {
 
           {notifs.length === 0 ? (
             <div className="flex flex-col items-center py-20 gap-3">
-              <span className="text-4xl opacity-20">🔔</span>
+              <span className="text-4xl opacity-20"></span>
               <p className="text-sm text-[var(--color-text-muted)]">No notifications yet.</p>
             </div>
           ) : (
@@ -64,8 +64,8 @@ export default async function NotificationsPage() {
                 <div
                   key={notif.id}
                   className={`bg-[var(--color-bg-surface)] border rounded-[var(--radius-md)] p-4 transition-all ${!notif.is_read
-                      ? 'border-l-4 border-l-[var(--color-accent)] border-r border-t border-b border-[var(--color-bg-border)]'
-                      : 'border-[var(--color-bg-border)]'
+                    ? 'border-l-4 border-l-[var(--color-accent)] border-r border-t border-b border-[var(--color-bg-border)]'
+                    : 'border-[var(--color-bg-border)]'
                     }`}
                 >
                   <div className="flex items-start gap-3">

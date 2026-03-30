@@ -10,6 +10,7 @@ import { ItemGrid } from '@/components/items/ItemGrid'
 import { Avatar } from '@/components/ui/Avatar'
 import { StatusBadge, TypeBadge } from '@/components/ui/Badge'
 import { formatRelative } from '@/utils/formatDate'
+import { ProfileStatusWarning } from '@/components/profile/ProfileStatusWarning'
 import type { Profile, PublicItem, Claim, Category } from '@/types'
 
 export const metadata: Metadata = { title: 'My Profile' }
@@ -61,6 +62,7 @@ export default async function ProfilePage({
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 md:px-8 py-8 pb-24 md:pb-8">
+          <ProfileStatusWarning />
           {/* Profile header */}
           <div className="flex items-start gap-4 mb-8 p-5 bg-[var(--color-bg-surface)] border border-[var(--color-bg-border)] rounded-[var(--radius-lg)]">
             <Avatar src={(profile as Profile).avatar_url} fallback={(profile as Profile).email} size={64} />
