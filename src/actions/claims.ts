@@ -4,13 +4,15 @@ import { createServerClient } from '@supabase/ssr'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { ClaimSchema } from '@/lib/validations/claim'
+import { requireAuth, requireOnboarded, requireAdmin } from '@/utils/security'
 import { sanitize } from '@/utils/sanitize'
 import type { ActionResult } from '@/types'
 
 export async function createClaim(formData: FormData): Promise<ActionResult> {
+  const user = await requireAuth()
+  await requireOnboarded(user.id)
+  
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'You must be logged in to submit a claim.' }
 
   const itemId = formData.get('item_id') as string
   if (!itemId) return { success: false, error: 'Item ID is required.' }
@@ -53,9 +55,10 @@ export async function createClaim(formData: FormData): Promise<ActionResult> {
 }
 
 export async function approveClaim(claimId: string, adminNote: string): Promise<ActionResult> {
+  const admin = await requireAuth()
+  await requireAdmin(admin.id)
+
   const supabase = await createClient()
-  const { data: { user: admin } } = await supabase.auth.getUser()
-  if (!admin) return { success: false, error: 'Unauthorized' }
 
   // High-privilege client to fetch private contact info for coordination
   const adminSupabase = createServerClient(
@@ -133,9 +136,10 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
 }
 
 export async function rejectClaim(claimId: string, reason: string): Promise<ActionResult> {
+  const user = await requireAuth()
+  await requireAdmin(user.id)
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
 
   // Get claim details for notification
   const { data: claim } = await supabase
@@ -172,15 +176,16 @@ export async function confirmHandover(
   claimId: string,
   role: 'poster' | 'claimer'
 ): Promise<ActionResult> {
+  const user = await requireAuth()
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
 
   const col = role === 'poster' ? 'poster_confirmed_at' : 'claimer_confirmed_at'
   const { error } = await supabase
     .from('claims')
     .update({ [col]: new Date().toISOString() })
     .eq('id', claimId)
+    .eq(role === 'poster' ? 'items(user_id)' : 'claimer_id', user.id) // Verify role matches user
   if (error) return { success: false, error: error.message }
 
   // Auto-resolve when both sides confirm
@@ -202,11 +207,10 @@ export async function assignToSecurityDesk(
   itemId: string,
   location: string
 ): Promise<ActionResult> {
+  const user = await requireAuth()
+  await requireAdmin(user.id)
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { success: false, error: 'Admin only' }
 
   const { error } = await supabase
     .from('items')

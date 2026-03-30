@@ -78,10 +78,24 @@ export function CompleteProfileModal() {
             <input
               {...register('uni_reg_no')}
               type="text"
-              placeholder="e.g. 20B-1234-CS"
-              className="w-full bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-sm)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)]"
+              placeholder="CCE23CS123"
+              autoFocus
+              className={`w-full bg-[var(--color-bg-elevated)] border rounded-[var(--radius-sm)] px-3 py-2.5 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-1 transition-all ${
+                errors.uni_reg_no 
+                  ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/50' 
+                  : 'border-[var(--color-bg-border)] focus:border-[var(--color-accent)] focus:ring-[var(--color-accent)]'
+              }`}
             />
-            {errors.uni_reg_no && <p className="mt-1 text-xs text-red-400">{errors.uni_reg_no.message}</p>}
+            <div className="flex justify-between items-start mt-1.5">
+              <p className="text-[10px] text-[var(--color-text-muted)] leading-tight">
+                Format: <strong>CCE</strong> + Year (22-26) + Branch + ID (1-220)
+              </p>
+              {errors.uni_reg_no && (
+                <p className="text-[10px] font-medium text-red-400 animate-in fade-in slide-in-from-top-1">
+                  Required pattern: CCE[Year][Branch][ID]
+                </p>
+              )}
+            </div>
           </div>
 
           <div>

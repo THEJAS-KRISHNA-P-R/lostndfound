@@ -4,13 +4,15 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PostItemSchema } from '@/lib/validations/item'
+import { requireAuth, requireOnboarded, requireAdmin, verifyItemOwnership } from '@/utils/security'
 import { sanitize } from '@/utils/sanitize'
 import type { ActionResult } from '@/types'
 
 export async function createItem(formData: FormData): Promise<ActionResult<{ id: string }>> {
+  const user = await requireAuth()
+  await requireOnboarded(user.id)
+  
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'You must be logged in to post an item.' }
 
   const raw = {
     type: formData.get('type'),
@@ -27,17 +29,6 @@ export async function createItem(formData: FormData): Promise<ActionResult<{ id:
   const parsed = PostItemSchema.safeParse(raw)
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
-  // Strict profile completeness check — prevent bypasses
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('uni_reg_no')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !profile.uni_reg_no || profile.uni_reg_no === 'PENDING') {
-    return { success: false, error: 'Please update your profile with your University Registration Number before posting items.' }
-  }
-
   const { data, error } = await supabase
     .from('items')
     .insert({ ...parsed.data, user_id: user.id })
@@ -51,9 +42,11 @@ export async function createItem(formData: FormData): Promise<ActionResult<{ id:
 }
 
 export async function updateItem(id: string, formData: FormData): Promise<ActionResult> {
+  const user = await requireAuth()
+  await requireOnboarded(user.id)
+  await verifyItemOwnership(id, user.id)
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
 
   const raw = {
     type: formData.get('type'),
@@ -107,9 +100,10 @@ export async function updateItemStatus(
   id: string,
   status: string
 ): Promise<ActionResult> {
+  const user = await requireAuth()
+  await requireAdmin(user.id)
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
 
   const { error } = await supabase
     .from('items')
@@ -124,11 +118,11 @@ export async function updateItemStatus(
 }
 
 export async function deleteItem(id: string): Promise<ActionResult> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
+  const user = await requireAuth()
+  await verifyItemOwnership(id, user.id)
 
-  const { error } = await supabase.from('items').delete().eq('id', id)
+  const supabase = await createClient()
+  const { error } = await supabase.from('items').delete().eq('id', id).eq('user_id', user.id)
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/browse')
@@ -137,14 +131,10 @@ export async function deleteItem(id: string): Promise<ActionResult> {
 }
 
 export async function bulkArchiveFlaggedItems(): Promise<ActionResult> {
+  const user = await requireAuth()
+  await requireAdmin(user.id)
+
   const supabase = await createClient()
-  
-  // 1. Verify admin role
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
-  
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { success: false, error: 'Forbidden' }
 
   // 2. Perform bulk update: set status 'archived' for all 'flagged' items
   const { error } = await supabase

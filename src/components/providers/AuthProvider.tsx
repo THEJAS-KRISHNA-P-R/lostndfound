@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('id', session.user.id)
           .single()
         setProfile(profile as Profile)
+        setInitialized(true)
       } else {
         clear()
         setInitialized(true)

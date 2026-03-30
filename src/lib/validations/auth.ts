@@ -8,7 +8,9 @@ export const LoginSchema = z.object({
 export const RegisterSchema = z.object({
   full_name: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Please enter a valid university email'),
-  uni_reg_no: z.string().min(3, 'University registration number is required'),
+  uni_reg_no: z
+    .string()
+    .regex(/^CCE(22|23|24|25|26)(CE|CS|DS|BS|EE|EC|ME)([1-9]\d{0,1}|1\d{2}|2[0-1]\d|220)$/, 'Invalid registration number format (e.g. CCE23CS123)'),
   phone: z.string().min(7, 'Please enter a valid phone number').optional().or(z.literal('')),
   password: z
     .string()
@@ -22,7 +24,9 @@ export const RegisterSchema = z.object({
 })
 
 export const CompleteProfileSchema = z.object({
-  uni_reg_no: z.string().min(3, 'University registration number is required'),
+  uni_reg_no: z
+    .string()
+    .regex(/^CCE(22|23|24|25|26)(CE|CS|DS|BS|EE|EC|ME)([1-9]\d{0,1}|1\d{2}|2[0-1]\d|220)$/, 'Invalid registration number format (e.g. CCE23CS123)'),
   phone: z.string().min(7, 'Please enter a valid phone number').optional().or(z.literal('')),
 })
 
