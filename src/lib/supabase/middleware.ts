@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (!profile || profile.uni_reg_no === 'PENDING') {
+    if (!profile || profile.uni_reg_no?.startsWith('PENDING')) {
       const url = request.nextUrl.clone()
       url.pathname = '/'
       return NextResponse.redirect(url)

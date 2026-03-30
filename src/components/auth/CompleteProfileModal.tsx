@@ -14,14 +14,17 @@ export function CompleteProfileModal() {
   const { profile, isAuthed, initialized } = useAuth()
   const [isPending, startTransition] = useTransition()
 
-  // Only show if user is authenticated and UNI Reg No is missing or 'PENDING'
+  // Only show if user is authenticated and UNI Reg No is missing or starts with 'PENDING'
   // We check 'initialized' to avoid flicker on first load
-  const isMissingData = isAuthed && initialized && (!profile?.uni_reg_no || profile?.uni_reg_no === 'PENDING')
+  const isMissingData = 
+    isAuthed && 
+    initialized && 
+    (!profile?.uni_reg_no || profile?.uni_reg_no.startsWith('PENDING'))
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CompleteProfileInput>({
     resolver: zodResolver(CompleteProfileSchema),
     defaultValues: {
-      uni_reg_no: profile?.uni_reg_no === 'PENDING' ? '' : (profile?.uni_reg_no ?? ''),
+      uni_reg_no: profile?.uni_reg_no?.startsWith('PENDING') ? '' : (profile?.uni_reg_no ?? ''),
       phone: profile?.phone ?? '',
     }
   })

@@ -8,9 +8,10 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     
-    if (!error) {
+    if (!error && data.session) {
+      // Small delay or explicit await can help in some server environments to ensure cookies are flushed
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
