@@ -3,7 +3,7 @@
 import { useAuthStore } from '@/store/authStore'
 
 export function useAuth() {
-  const { profile, session, initialized, onboardingOpen, setOnboardingOpen } = useAuthStore()
+  const { profile, session, initialized, onboardingOpen, setOnboardingOpen, setProfile } = useAuthStore()
   
   const isOnboarded = !!profile?.uni_reg_no && !profile.uni_reg_no.startsWith('PENDING')
 
@@ -13,6 +13,7 @@ export function useAuth() {
     initialized,
     onboardingOpen,
     setOnboardingOpen,
+    setProfile,
     isAdmin: profile?.role === 'admin',
     isAuthed: !!session,
     userId: session?.user?.id ?? null,

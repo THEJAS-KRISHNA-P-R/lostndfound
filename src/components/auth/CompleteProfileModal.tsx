@@ -12,7 +12,7 @@ import { CompleteProfileSchema, type CompleteProfileInput } from '@/lib/validati
 import { updateProfile } from '@/actions/auth'
 
 export function CompleteProfileModal() {
-  const { profile, isAuthed, initialized, onboardingOpen, setOnboardingOpen } = useAuth()
+  const { profile, isAuthed, initialized, onboardingOpen, setOnboardingOpen, setProfile } = useAuth()
   const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -63,7 +63,8 @@ export function CompleteProfileModal() {
     startTransition(async () => {
       try {
         const result = await updateProfile(fd)
-        if (result.success) {
+        if (result.success && result.data) {
+          setProfile(result.data) // Update global state immediately
           toast.success('Profile completed! Welcome aboard.')
           setOnboardingOpen(false) // Close modal on success
         } else {

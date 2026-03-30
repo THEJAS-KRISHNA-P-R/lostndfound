@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { LoginSchema, RegisterSchema, CompleteProfileSchema } from '@/lib/validations/auth'
-import type { ActionResult } from '@/types'
+import type { ActionResult, Profile } from '@/types'
 
 export async function login(formData: FormData): Promise<ActionResult<{ role: string }>> {
   const raw = { email: formData.get('email'), password: formData.get('password') }
@@ -78,7 +78,7 @@ export async function signInWithGoogle(): Promise<ActionResult<{ url: string | n
   return { success: true, data: { url: data.url } }
 }
 
-export async function updateProfile(formData: FormData): Promise<ActionResult> {
+export async function updateProfile(formData: FormData): Promise<ActionResult<Profile>> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Unauthorized' }
@@ -105,6 +105,13 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
     return { success: false, error: error.message }
   }
 
+  // Fetch the updated profile to return to the client
+  const { data: updatedProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
   revalidatePath('/', 'layout')
-  return { success: true }
+  return { success: true, data: updatedProfile as Profile }
 }
