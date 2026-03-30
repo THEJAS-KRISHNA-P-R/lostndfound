@@ -15,7 +15,7 @@ export function Logo({ className = '', scale = 1 }: LogoProps) {
       style={{ transform: scale !== 1 ? `scale(${scale})` : undefined, transformOrigin: 'left center' }}
     >
       <Image
-        src="/logos/lofo-merged.png"
+        src="/lofo-merged.png"
         alt="LOFO Logo"
         width={180}
         height={48}

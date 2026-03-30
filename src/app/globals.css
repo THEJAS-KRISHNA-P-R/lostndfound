@@ -16,11 +16,11 @@
   --color-bg-elevated: #1E2028;
   --color-bg-border: #2A2D37;
 
-  /* Accent — warm amber gold */
-  --color-accent: #F5A623;
-  --color-accent-hover: #E09410;
-  --color-accent-dim: rgba(245, 166, 35, 0.12);
-  --color-accent-glow: rgba(245, 166, 35, 0.20);
+  /* Accent — Direct Vibrant Orange */
+  --color-accent: #ff6d00;
+  --color-accent-hover: #e65100;
+  --color-accent-dim: rgba(255, 109, 0, 0.12);
+  --color-accent-glow: rgba(255, 109, 0, 0.20);
 
   /* Text */
   --color-text-primary: #F0F2F5;
