@@ -28,9 +28,9 @@ export function ItemCardSkeleton() {
   )
 }
 
-export function ItemGridSkeleton({ count = 6 }: { count?: number }) {
+export function ItemGridSkeleton({ count = 6, className }: { count?: number; className?: string }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className={className || "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"}>
       {Array.from({ length: count }).map((_, i) => (
         <ItemCardSkeleton key={i} />
       ))}

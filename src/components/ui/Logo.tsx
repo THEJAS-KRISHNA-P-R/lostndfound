@@ -21,7 +21,7 @@ export function Logo({ className = '', scale = 1 }: LogoProps) {
         height={48}
         quality={95}
         priority
-        className="h-10 w-auto transition-transform group-active:scale-95"
+        className="h-8 md:h-10 w-auto max-w-[120px] md:max-w-none transition-transform group-active:scale-95"
       />
     </Link>
   )

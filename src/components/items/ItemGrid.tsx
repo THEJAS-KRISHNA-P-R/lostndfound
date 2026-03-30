@@ -1,5 +1,5 @@
 import { PackageSearch } from 'lucide-react'
-import { Skeleton } from '@/components/ui/Skeleton'
+import { ItemGridSkeleton } from '@/components/ui/Skeleton'
 import { ItemCard } from './ItemCard'
 import type { PublicItem, Profile, Category } from '@/types'
 
@@ -19,9 +19,7 @@ interface ItemGridProps {
 export function ItemGrid({ items, loading, emptyMessage = 'No items found.', emptyCta, editable }: ItemGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <Skeleton variant="card" count={8} />
-      </div>
+      <ItemGridSkeleton count={8} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" />
     )
   }
 
