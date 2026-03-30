@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PostItemSchema } from '@/lib/validations/item'
 import { sanitize } from '@/utils/sanitize'
+import { findMatchingLostItems } from '@/utils/matchItems'
 import type { ActionResult } from '@/types'
 
 export async function createItem(formData: FormData): Promise<ActionResult<{ id: string }>> {
@@ -34,6 +35,38 @@ export async function createItem(formData: FormData): Promise<ActionResult<{ id:
     .single()
 
   if (error) return { success: false, error: error.message }
+
+  // Auto-match: when a found item is posted, check for similar lost items
+  if (parsed.data.type === 'found') {
+    try {
+      const matches = await findMatchingLostItems({
+        title: parsed.data.title,
+        description: parsed.data.description,
+        category_id: parsed.data.category_id,
+        location: parsed.data.location,
+      })
+
+      if (matches.length > 0) {
+        const notifications = matches.map(match => ({
+          user_id: match.user_id,
+          sender_id: user.id,
+          title: '🔍 Possible Match Found!',
+          message: `A found item "${parsed.data.title}" may match your lost "${match.title}". Check it out!`,
+          type: 'match_found',
+          metadata: {
+            item_id: data.id,
+            item_title: parsed.data.title,
+            lost_item_title: match.title,
+          },
+        }))
+
+        await supabase.from('notifications').insert(notifications)
+      }
+    } catch (matchError) {
+      // Never let matching errors block item creation
+      console.error('🔍 [Match] Error during auto-matching:', matchError)
+    }
+  }
 
   revalidatePath('/browse')
   return { success: true, data: { id: data.id } }

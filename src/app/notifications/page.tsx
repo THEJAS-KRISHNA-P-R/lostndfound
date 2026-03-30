@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
 import { PageShell } from '@/components/layout/PageShell'
@@ -6,7 +7,7 @@ import { Footer } from '@/components/layout/Footer'
 import { markAllRead } from '@/actions/notifications'
 import { formatRelative } from '@/utils/formatDate'
 import {
-  Info, CheckCircle, AlertTriangle, XCircle, UserCheck
+  Info, CheckCircle, AlertTriangle, XCircle, UserCheck, Search
 } from 'lucide-react'
 import { ContactCard } from '@/components/notifications/ContactCard'
 import { MarkReadOnMount } from '@/components/notifications/MarkReadOnMount'
@@ -19,6 +20,7 @@ const typeIcons: Record<string, React.ReactNode> = {
   claim_approved: <UserCheck size={16} className="text-[var(--color-accent)]" />,
   claim_rejected: <XCircle size={16} className="text-red-400" />,
   contact_shared: <UserCheck size={16} className="text-[var(--color-accent)]" />,
+  match_found: <Search size={16} className="text-purple-400" />,
 }
 
 export default async function NotificationsPage() {
@@ -79,6 +81,15 @@ export default async function NotificationsPage() {
                       </div>
                       <p className="text-sm text-[var(--color-text-muted)] mt-0.5 leading-relaxed">{notif.message}</p>
                       {notif.type === 'contact_shared' && <ContactCard metadata={notif.metadata} />}
+                      {notif.type === 'match_found' && notif.metadata?.item_id && (
+                        <Link
+                          href={`/items/${notif.metadata.item_id}`}
+                          className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 text-xs font-semibold rounded-[var(--radius-sm)] bg-purple-950 text-purple-300 border border-purple-800 hover:bg-purple-900 transition-colors"
+                        >
+                          <Search size={12} />
+                          View Match →
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
