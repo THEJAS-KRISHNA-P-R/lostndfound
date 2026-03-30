@@ -16,6 +16,7 @@ import { ImageCarousel } from '@/components/items/ImageCarousel'
 import { HandoverPanel } from '@/components/items/HandoverPanel'
 import { AdminActions } from '@/components/items/AdminActions'
 import { DeleteItemButton } from '@/components/items/DeleteItemButton'
+import { ItemActionButtons } from '@/components/items/ItemActionButtons'
 
 type FullItem = Item & {
   profiles: Pick<Profile, 'id' | 'full_name' | 'avatar_url' | 'email'>
@@ -182,11 +183,7 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
               <AdminActions itemId={typedItem.id} itemTitle={typedItem.title} />
             )}
             {canClaim && (
-              <Link href={typedItem.type === 'found' ? `/claim/${typedItem.id}` : `/report-found/${typedItem.id}`}>
-                <Button fullWidth size="lg">
-                  {typedItem.type === 'found' ? 'Submit a Claim' : "I've Found This"}
-                </Button>
-              </Link>
+              <ItemActionButtons itemId={typedItem.id} itemType={typedItem.type as 'lost' | 'found'} />
             )}
             {typedItem.status !== 'active' && !isOwner && !isAdmin && (
               <div className="text-center text-sm text-[var(--color-text-muted)] py-3 border border-[var(--color-bg-border)] rounded-[var(--radius-md)]">

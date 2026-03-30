@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition, useEffect } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
@@ -11,15 +12,30 @@ import { CompleteProfileSchema, type CompleteProfileInput } from '@/lib/validati
 import { updateProfile } from '@/actions/auth'
 
 export function CompleteProfileModal() {
-  const { profile, isAuthed, initialized } = useAuth()
+  const { profile, isAuthed, initialized, onboardingOpen, setOnboardingOpen } = useAuth()
   const [isPending, startTransition] = useTransition()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  // Only show if user is authenticated and UNI Reg No is missing or starts with 'PENDING'
-  // We check 'initialized' to avoid flicker on first load
   const isMissingData = 
     isAuthed && 
     initialized && 
     (!profile?.uni_reg_no || profile?.uni_reg_no.startsWith('PENDING'))
+
+  // Auto-open logic (context-aware)
+  useEffect(() => {
+    if (!isMissingData || onboardingOpen) return
+
+    const isSignup = searchParams.get('signup') === 'true'
+    const isProtectedPage = 
+      pathname === '/post' || 
+      pathname.startsWith('/claim/') || 
+      pathname.startsWith('/report-found/')
+
+    if (isSignup || isProtectedPage) {
+      setOnboardingOpen(true)
+    }
+  }, [isMissingData, onboardingOpen, setOnboardingOpen, pathname, searchParams])
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CompleteProfileInput>({
     resolver: zodResolver(CompleteProfileSchema),
@@ -29,11 +45,11 @@ export function CompleteProfileModal() {
     }
   })
 
-  // Sync form defaults when profile loads (handles the jump after Google OAuth redirect)
+  // Sync form defaults when profile loads
   useEffect(() => {
     if (profile) {
       reset({
-        uni_reg_no: profile.uni_reg_no === 'PENDING' ? '' : profile.uni_reg_no,
+        uni_reg_no: profile.uni_reg_no?.startsWith('PENDING') ? '' : profile.uni_reg_no,
         phone: profile.phone ?? '',
       })
     }
@@ -49,6 +65,7 @@ export function CompleteProfileModal() {
         const result = await updateProfile(fd)
         if (result.success) {
           toast.success('Profile completed! Welcome aboard.')
+          setOnboardingOpen(false) // Close modal on success
         } else {
           toast.error(result.error ?? 'Something went wrong.')
         }
@@ -58,13 +75,13 @@ export function CompleteProfileModal() {
     })
   }
 
-  if (!isMissingData) return null
+  if (!onboardingOpen) return null
 
   return (
     <Modal
-      open={true}
-      onClose={() => {}} 
-      closable={false}
+      open={onboardingOpen}
+      onClose={() => setOnboardingOpen(false)} 
+      closable={!isMissingData} // Block closing if data is truly missing
       title="Complete your profile"
       maxWidth="max-w-md"
     >

@@ -11,8 +11,17 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && data.session) {
-      // Small delay or explicit await can help in some server environments to ensure cookies are flushed
-      return NextResponse.redirect(`${origin}${next}`)
+      // Check if this is a new user (profile is PENDING-*)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('uni_reg_no')
+        .eq('id', data.session.user.id)
+        .single()
+        
+      const isNew = !profile?.uni_reg_no || profile.uni_reg_no.startsWith('PENDING')
+      const redirectUrl = isNew ? `${origin}${next}?signup=true` : `${origin}${next}`
+      
+      return NextResponse.redirect(redirectUrl)
     }
   }
 

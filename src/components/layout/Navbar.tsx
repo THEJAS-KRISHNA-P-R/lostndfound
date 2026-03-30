@@ -10,6 +10,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { logout } from '@/actions/auth'
 import { Avatar } from '@/components/ui/Avatar'
 import { NotifBell } from '@/components/ui/NotifBell'
+import { OnboardingGuard } from '@/components/auth/OnboardingGuard'
 
 const navLinks = [
   { href: '/', label: 'Home', icon: Home },
@@ -58,12 +59,14 @@ export function Navbar() {
           {isAuthed ? (
             <>
               {/* Post Item button — desktop */}
-              <Link
-                href="/post"
-                className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[#0D0F14] text-sm font-semibold transition-colors active:scale-95"
-              >
-                <Plus size={16} /> Post Item
-              </Link>
+              <OnboardingGuard>
+                <Link
+                  href="/post"
+                  className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[#0D0F14] text-sm font-semibold transition-colors active:scale-95"
+                >
+                  <Plus size={16} /> Post Item
+                </Link>
+              </OnboardingGuard>
               {isAdmin && (
                 <Link href="/admin" className="hidden md:block text-xs text-[var(--color-accent)] hover:underline px-2">
                   Admin
@@ -118,14 +121,15 @@ export function Navbar() {
             {navLinks.map(({ href, label, icon: Icon }) => {
               const active = pathname === href || (href !== '/' && pathname.startsWith(href))
               return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs transition-colors ${active ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'}`}
-                >
-                  <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
-                  {label}
-                </Link>
+                <OnboardingGuard key={href}>
+                  <Link
+                    href={href}
+                    className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs transition-colors ${active ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'}`}
+                  >
+                    <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
+                    {label}
+                  </Link>
+                </OnboardingGuard>
               )
             })}
             <Link

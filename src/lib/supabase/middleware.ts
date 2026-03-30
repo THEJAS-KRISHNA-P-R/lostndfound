@@ -41,21 +41,6 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Onboarding enforcement — Redirect users with PENDING status to Home to complete modal
-  if (user && isProtected && (request.nextUrl.pathname.startsWith('/post') || request.nextUrl.pathname.startsWith('/claim'))) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('uni_reg_no')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.uni_reg_no?.startsWith('PENDING')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
-  }
-
   // Admin routes — check role from profiles
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (!user) {

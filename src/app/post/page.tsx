@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Controller, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { Lock } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 import { createItem } from '@/actions/items'
 import { CATEGORIES } from '@/utils/constants'
 import { PageShell } from '@/components/layout/PageShell'
@@ -41,6 +42,14 @@ export default function PostItemPage() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [itemType, setItemType] = useState<'found' | 'lost'>('found')
+  const { isOnboarded, setOnboardingOpen, initialized } = useAuth()
+
+  // Auto-open onboarding if user lands here directly and isn't onboarded
+  useEffect(() => {
+    if (initialized && !isOnboarded) {
+      setOnboardingOpen(true)
+    }
+  }, [initialized, isOnboarded, setOnboardingOpen])
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
     defaultValues: { images: [] },

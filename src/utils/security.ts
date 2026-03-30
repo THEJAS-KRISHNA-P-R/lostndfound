@@ -30,7 +30,7 @@ export async function requireOnboarded(userId: string): Promise<Profile> {
     .eq('id', userId)
     .single()
     
-  if (error || !profile || profile.uni_reg_no === 'PENDING') {
+  if (error || !profile || !profile.uni_reg_no || profile.uni_reg_no.startsWith('PENDING')) {
     throw new Error('Onboarding required')
   }
   

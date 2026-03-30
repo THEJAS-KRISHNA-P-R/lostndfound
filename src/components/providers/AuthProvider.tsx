@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/authStore'
 import type { Profile } from '@/types'
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js'
-
 import { CompleteProfileModal } from '@/components/auth/CompleteProfileModal'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -57,8 +56,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <CompleteProfileModal />
+      <Suspense fallback={null}>
+        <CompleteProfileModal />
+      </Suspense>
       {children}
     </>
   )
 }
+
