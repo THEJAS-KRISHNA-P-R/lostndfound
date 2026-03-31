@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+
 import { createClient } from '@/lib/supabase/server'
 import { PostItemSchema } from '@/lib/validations/item'
 import { requireAuth, requireOnboarded, requireAdmin, verifyItemOwnership } from '@/utils/security'
@@ -158,15 +158,26 @@ export async function updateItemStatus(
 
 export async function deleteItem(id: string): Promise<ActionResult> {
   const user = await requireAuth()
-  await verifyItemOwnership(id, user.id)
 
   const supabase = await createClient()
-  const { error } = await supabase.from('items').delete().eq('id', id).eq('user_id', user.id)
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const isAdmin = profile?.role === 'admin'
+
+  if (!isAdmin) {
+    await verifyItemOwnership(id, user.id)
+  }
+
+  let query = supabase.from('items').delete().eq('id', id)
+  if (!isAdmin) {
+    query = query.eq('user_id', user.id)
+  }
+
+  const { error } = await query
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/browse')
   revalidatePath(`/items/${id}`)
-  redirect('/browse')
+  return { success: true }
 }
 
 export async function bulkArchiveFlaggedItems(): Promise<ActionResult> {
