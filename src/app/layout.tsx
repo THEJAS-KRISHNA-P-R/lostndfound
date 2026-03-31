@@ -1,7 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/components/providers/AuthProvider'
+import { PWARegister } from '@/components/providers/PWARegister'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -23,6 +24,14 @@ const jetbrains = JetBrains_Mono({
   weight: ['400'],
 })
 
+export const viewport: Viewport = {
+  themeColor: '#ff6d00',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
+
 export const metadata: Metadata = {
   title: {
     default: 'LOFO — Find What\'s Yours',
@@ -35,6 +44,11 @@ export const metadata: Metadata = {
     title: 'LOFO — Find What\'s Yours',
     description: 'University Lost & Found Platform',
     type: 'website',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'LOFO',
   },
   icons: {
     icon: [
@@ -58,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${playfair.variable} ${dmSans.variable} ${jetbrains.variable}`}
     >
       <body>
+        <PWARegister />
         <AuthProvider>
           {children}
         </AuthProvider>
