@@ -32,13 +32,13 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section className="relative min-h-[calc(100dvh-60px)] flex items-center justify-center overflow-hidden">
         {/* MagicRings background */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-55">
           <MagicRingsClient
             color="#ffbb00ff"
             colorTwo="#ff8400ff"
             ringCount={6}
             speed={0.6}
-            attenuation={10}
+            attenuation={8}
             lineThickness={2}
             baseRadius={0.56}
             radiusStep={0.18}
@@ -60,8 +60,7 @@ export default function LandingPage() {
             <span className="text-[var(--color-accent)]">We&apos;ll find it.</span>
           </h1>
           <p className="text-[var(--color-text-secondary)] text-lg md:text-xl mb-10 leading-relaxed max-w-xl mx-auto">
-            LOFO is your campus lost &amp; found — post items you&apos;ve found, report what you&apos;ve lost,
-            and let your community help reunite belongings.
+            Post items, report losses, and recover what&apos;s yours in seconds.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link

@@ -80,6 +80,7 @@ export interface MagicRingsProps {
   hoverScale?: number
   parallax?: number
   clickBurst?: boolean
+  mobileRotationOffset?: number
 }
 
 const parseColor = (c: string) => {
@@ -112,9 +113,10 @@ export function MagicRings({
   hoverScale = 1.05,
   parallax = 0.05,
   clickBurst = false,
+  mobileRotationOffset = 90,
 }: MagicRingsProps) {
   const mountRef = useRef<HTMLDivElement>(null)
-  const propsRef = useRef({ color, colorTwo, speed, ringCount, attenuation, lineThickness, baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount, rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence, hoverScale, parallax, clickBurst })
+  const propsRef = useRef({ color, colorTwo, speed, ringCount, attenuation, lineThickness, baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount, rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence, hoverScale, parallax, clickBurst, mobileRotationOffset })
   const mouseRef = useRef([0, 0])
   const smoothMouseRef = useRef([0, 0])
   const hoverAmountRef = useRef(0)
@@ -122,8 +124,8 @@ export function MagicRings({
   const burstRef = useRef(0)
 
   useEffect(() => {
-    propsRef.current = { color, colorTwo, speed, ringCount, attenuation, lineThickness, baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount, rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence, hoverScale, parallax, clickBurst }
-  }, [color, colorTwo, speed, ringCount, attenuation, lineThickness, baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount, rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence, hoverScale, parallax, clickBurst])
+    propsRef.current = { color, colorTwo, speed, ringCount, attenuation, lineThickness, baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount, rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence, hoverScale, parallax, clickBurst, mobileRotationOffset }
+  }, [color, colorTwo, speed, ringCount, attenuation, lineThickness, baseRadius, radiusStep, scaleRate, opacity, blur, noiseAmount, rotation, ringGap, fadeIn, fadeOut, followMouse, mouseInfluence, hoverScale, parallax, clickBurst, mobileRotationOffset])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -178,7 +180,12 @@ export function MagicRings({
       uniforms.uLineThickness.value = p.lineThickness; uniforms.uBaseRadius.value = p.baseRadius
       uniforms.uRadiusStep.value = p.radiusStep; uniforms.uScaleRate.value = p.scaleRate
       uniforms.uRingCount.value = p.ringCount; uniforms.uOpacity.value = p.opacity
-      uniforms.uNoiseAmount.value = p.noiseAmount; uniforms.uRotation.value = (p.rotation * Math.PI) / 180
+      uniforms.uNoiseAmount.value = p.noiseAmount
+
+      // Apply mobile rotation offset if window is narrow
+      const finalRotation = (window.innerWidth < 768) ? p.rotation + p.mobileRotationOffset : p.rotation
+      uniforms.uRotation.value = (finalRotation * Math.PI) / 180
+
       uniforms.uRingGap.value = p.ringGap; uniforms.uFadeIn.value = p.fadeIn; uniforms.uFadeOut.value = p.fadeOut
       uniforms.uMouse.value.set(smoothMouseRef.current[0], smoothMouseRef.current[1])
       uniforms.uMouseInfluence.value = p.followMouse ? p.mouseInfluence : 0
@@ -194,7 +201,13 @@ export function MagicRings({
     }
   }, [])
 
-  return <div ref={mountRef} className="w-full h-full" style={blur > 0 ? { filter: `blur(${blur}px)` } : undefined} />
+  return (
+    <div
+      ref={mountRef}
+      className="w-full h-full"
+      style={blur > 0 ? { filter: `blur(${blur}px)` } : undefined}
+    />
+  )
 }
 
 export default MagicRings
