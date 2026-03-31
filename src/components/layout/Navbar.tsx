@@ -56,65 +56,67 @@ export function Navbar() {
 
         {/* Right actions */}
         <div className="ml-auto min-h-[40px] flex items-center gap-2">
-          {/* Prevent showing old buttons during initialization/hydration */}
-          {initialized ? (
-            isAuthed ? (
-              <>
-                {/* Post Item button — desktop */}
-                <OnboardingGuard>
-                  <Link
-                    href="/post"
-                    className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[#0D0F14] text-sm font-semibold transition-colors active:scale-95"
-                  >
-                    <Plus size={16} /> Post Item
-                  </Link>
-                </OnboardingGuard>
-                {isAdmin && (
-                  <Link href="/admin" className="hidden md:block text-xs text-[var(--color-accent)] hover:underline px-2">
-                    Admin
-                  </Link>
-                )}
-                <NotifBell count={unreadCount} />
-                {/* Avatar dropdown trigger */}
-                <div className="relative">
-                  <button onClick={() => setMenuOpen(v => !v)} className="rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-base)]">
-                    <Avatar src={profile?.avatar_url} fallback={profile?.email ?? session?.user?.email ?? 'U'} size={32} />
-                  </button>
-                  {menuOpen && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                      <div className="absolute right-0 mt-2 w-48 bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-md)] shadow-xl z-20 py-1">
-                        <div className="px-4 py-2 border-b border-[var(--color-bg-border)]">
-                           <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{profile?.full_name ?? 'User'}</p>
-                          <p className="text-xs text-[var(--color-text-muted)] truncate">{profile?.email ?? session?.user?.email}</p>
-                        </div>
-                        <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-border)]">
-                          <Settings size={14} /> Profile
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          disabled={loggingOut}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-[var(--color-bg-border)] hover:text-red-300"
-                        >
-                          <LogOut size={14} /> {loggingOut ? 'Signing out…' : 'Sign out'}
-                        </button>
+          {/* Logic: 
+              1. If we have a session (isAuthed), show profile immediately.
+              2. If no session but initialized, show login buttons.
+              3. Otherwise (loading), show nothing to avoid flicker.
+          */}
+          {isAuthed ? (
+            <>
+              {/* Post Item button — desktop */}
+              <OnboardingGuard>
+                <Link
+                  href="/post"
+                  className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[#0D0F14] text-sm font-semibold transition-colors active:scale-95"
+                >
+                  <Plus size={16} /> Post Item
+                </Link>
+              </OnboardingGuard>
+              {isAdmin && (
+                <Link href="/admin" className="hidden md:block text-xs text-[var(--color-accent)] hover:underline px-2">
+                  Admin
+                </Link>
+              )}
+              <NotifBell count={unreadCount} />
+              {/* Avatar dropdown trigger */}
+              <div className="relative">
+                <button onClick={() => setMenuOpen(v => !v)} className="rounded-full focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-base)]">
+                  <Avatar src={profile?.avatar_url} fallback={profile?.email ?? session?.user?.email ?? 'U'} size={32} />
+                </button>
+                {menuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                    <div className="absolute right-0 mt-2 w-48 bg-[var(--color-bg-elevated)] border border-[var(--color-bg-border)] rounded-[var(--radius-md)] shadow-xl z-20 py-1">
+                      <div className="px-4 py-2 border-b border-[var(--color-bg-border)]">
+                         <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{profile?.full_name ?? 'User'}</p>
+                        <p className="text-xs text-[var(--color-text-muted)] truncate">{profile?.email ?? session?.user?.email}</p>
                       </div>
-                    </>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-2 animate-in fade-in duration-300">
-                <Link href="/login" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hidden md:block px-3">
-                  Sign in
-                </Link>
-                <Link href="/register" className="px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[#0D0F14] text-sm font-semibold transition-colors">
-                  Get Started
-                </Link>
+                      <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-border)]">
+                        <Settings size={14} /> Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        disabled={loggingOut}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-[var(--color-bg-border)] hover:text-red-300"
+                      >
+                        <LogOut size={14} /> {loggingOut ? 'Signing out…' : 'Sign out'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-            )
+            </>
+          ) : initialized ? (
+            <div className="flex items-center gap-2 animate-in fade-in duration-300">
+              <Link href="/login" className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hidden md:block px-3">
+                Sign in
+              </Link>
+              <Link href="/register" className="px-4 py-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[#0D0F14] text-sm font-semibold transition-colors">
+                Get Started
+              </Link>
+            </div>
           ) : (
-            <div className="w-20" /> // Transparent placeholder during load
+            <div className="w-20" /> /* placeholder during load */
           )}
         </div>
       </nav>

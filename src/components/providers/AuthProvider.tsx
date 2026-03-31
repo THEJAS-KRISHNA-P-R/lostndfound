@@ -13,62 +13,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
     let isMounted = true
+    let hasInitialized = false
 
-    async function fetchProfile(session: Session) {
-      if (!session?.user || !isMounted) return
-      
+    async function handleSession(session: Session | null) {
+      if (!isMounted) return
+
+      if (!session?.user) {
+        clear()
+        if (!hasInitialized) {
+          hasInitialized = true
+          setInitialized(true)
+        }
+        return
+      }
+
       try {
+        // Set session first so isAuthed is true immediately in the Navbar
+        setSession(session)
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single()
-        
-        if (isMounted) {
+
+        if (isMounted && profile) {
           setProfile(profile as Profile)
-          setSession(session)
         }
       } catch (err) {
         console.error('Error fetching profile:', err)
       } finally {
-        if (isMounted) setInitialized(true)
-      }
-    }
-
-    async function init() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          await fetchProfile(session)
-        } else {
-          if (isMounted) {
-            clear()
-            setInitialized(true)
-          }
+        if (isMounted && !hasInitialized) {
+          hasInitialized = true
+          setInitialized(true)
         }
-      } catch (err) {
-        console.error('Error in AuthProvider init:', err)
-        if (isMounted) setInitialized(true)
       }
     }
 
-    init()
-
+    // onAuthStateChange fires INITIAL_SESSION on mount (guaranteed by Supabase),
+    // so we do NOT need a separate getSession() call. This prevents double-init.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      if (event === 'SIGNED_IN' && session) {
-        await fetchProfile(session)
-      } else if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT') {
         clear()
         setInitialized(true)
-      } else if (session) {
-        // Handle token refreshes etc.
-        setSession(session)
+      } else {
+        // Handles INITIAL_SESSION, SIGNED_IN, TOKEN_REFRESHED, USER_UPDATED
+        await handleSession(session)
       }
     })
+
+    // Safety fallback — if Supabase never fires an event (network down, etc.)
+    const timeout = setTimeout(() => {
+      if (isMounted && !hasInitialized) {
+        hasInitialized = true
+        setInitialized(true)
+      }
+    }, 3000)
 
     return () => {
       isMounted = false
       subscription.unsubscribe()
+      clearTimeout(timeout)
     }
   }, [setProfile, setSession, setInitialized, clear])
 

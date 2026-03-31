@@ -42,14 +42,14 @@ export default function PostItemPage() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [itemType, setItemType] = useState<'found' | 'lost'>('found')
-  const { isOnboarded, setOnboardingOpen, initialized } = useAuth()
+  const { isOnboarded, isAuthed, setOnboardingOpen, initialized } = useAuth()
 
-  // Auto-open onboarding if user lands here directly and isn't onboarded
+  // Auto-open onboarding if authenticated user lands here and isn't onboarded
   useEffect(() => {
-    if (initialized && !isOnboarded) {
+    if (initialized && isAuthed && !isOnboarded) {
       setOnboardingOpen(true)
     }
-  }, [initialized, isOnboarded, setOnboardingOpen])
+  }, [initialized, isAuthed, isOnboarded, setOnboardingOpen])
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
     defaultValues: { images: [] },
