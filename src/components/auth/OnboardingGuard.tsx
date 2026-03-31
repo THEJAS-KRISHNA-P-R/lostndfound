@@ -13,11 +13,18 @@ interface OnboardingGuardProps {
  * If the user is not onboarded, it prevents the action and opens the onboarding modal.
  */
 export function OnboardingGuard({ children, fallback }: OnboardingGuardProps) {
-  const { isOnboarded, isAuthed, setOnboardingOpen } = useAuth()
+  const { isOnboarded, isAuthed, setOnboardingOpen, initialized } = useAuth()
 
   const handleClick = (e: React.MouseEvent) => {
     // If not authenticated, let the natural link (e.g. /login) handle it
     if (!isAuthed) return
+
+    // Wait until we are sure which way to go
+    if (!initialized) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
 
     // If not onboarded, intercept and show modal
     if (!isOnboarded) {

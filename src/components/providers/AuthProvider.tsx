@@ -27,37 +27,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      try {
-        // Set session first so isAuthed is true immediately in the Navbar
-        setSession(session)
+      // 1. Always set the session first so isAuthed is true immediately
+      setSession(session)
+      
+      // 2. Persistent Profile Fetch with Retry
+      let retries = 3
+      let profileData = null
+      let success = false
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-
-        if (isMounted && profile) {
-          setProfile(profile as Profile)
+      while (retries > 0 && isMounted) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+            
+          if (error) throw error
+          
+          if (data) {
+            profileData = data
+            success = true
+            break
+          }
+        } catch (err) {
+          console.error(`AuthProvider: Fetch trial ${4 - retries} failed:`, err)
+          retries--
+          if (retries > 0) await new Promise(r => setTimeout(r, 1000 / retries))
         }
-      } catch (err) {
-        console.error('Error fetching profile:', err)
-      } finally {
-        if (isMounted && !hasInitialized) {
+      }
+
+      if (isMounted) {
+        if (success && profileData) {
+          setProfile(profileData as Profile)
+        }
+        
+        // Only mark as initialized once we've definitively tried to fetch the profile
+        if (!hasInitialized) {
           hasInitialized = true
           setInitialized(true)
         }
       }
     }
 
-    // onAuthStateChange fires INITIAL_SESSION on mount (guaranteed by Supabase),
-    // so we do NOT need a separate getSession() call. This prevents double-init.
+    // onAuthStateChange fires INITIAL_SESSION on mount.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_OUT') {
         clear()
         setInitialized(true)
       } else {
-        // Handles INITIAL_SESSION, SIGNED_IN, TOKEN_REFRESHED, USER_UPDATED
         await handleSession(session)
       }
     })

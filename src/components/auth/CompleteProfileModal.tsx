@@ -20,7 +20,7 @@ export function CompleteProfileModal() {
   const isMissingData = 
     !!isAuthed && 
     initialized && 
-    (!profile?.uni_reg_no || profile?.uni_reg_no.startsWith('PENDING'))
+    (!profile?.uni_reg_no || profile?.uni_reg_no.toUpperCase().startsWith('PENDING'))
 
   // Auto-open logic (context-aware)
   useEffect(() => {
@@ -47,7 +47,7 @@ export function CompleteProfileModal() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CompleteProfileInput>({
     resolver: zodResolver(CompleteProfileSchema),
     defaultValues: {
-      uni_reg_no: profile?.uni_reg_no?.startsWith('PENDING') ? '' : (profile?.uni_reg_no ?? ''),
+      uni_reg_no: profile?.uni_reg_no?.toUpperCase().startsWith('PENDING') ? '' : (profile?.uni_reg_no ?? ''),
       phone: profile?.phone ?? '',
     }
   })
@@ -56,7 +56,7 @@ export function CompleteProfileModal() {
   useEffect(() => {
     if (profile) {
       reset({
-        uni_reg_no: profile.uni_reg_no?.startsWith('PENDING') ? '' : profile.uni_reg_no,
+        uni_reg_no: profile.uni_reg_no?.toUpperCase().startsWith('PENDING') ? '' : profile.uni_reg_no,
         phone: profile.phone ?? '',
       })
     }
