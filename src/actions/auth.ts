@@ -110,6 +110,16 @@ export async function updateProfile(formData: FormData): Promise<ActionResult<Pr
     .select()
     .single()
 
+  // Sync to auth metadata so that our AuthProvider fallback works immediately on hydration
+  if (!error && updatedProfile) {
+    await supabase.auth.updateUser({
+      data: { 
+        uni_reg_no, 
+        phone: phone || null 
+      }
+    })
+  }
+
   if (error) {
     if (error.code === '23505') return { success: false, error: 'This registration number is already in use.' }
     return { success: false, error: error.message }
