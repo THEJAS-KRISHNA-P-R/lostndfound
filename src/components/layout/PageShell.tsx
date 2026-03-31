@@ -14,7 +14,7 @@ interface PageShellProps {
 export function PageShell({ children, className = '' }: PageShellProps) {
   return (
     <div className={`relative min-h-screen ${className}`}>
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-20">
         <DotGrid className="w-full h-full" />
       </div>
       <div className="relative z-10">{children}</div>
