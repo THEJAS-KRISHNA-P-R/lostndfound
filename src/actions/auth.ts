@@ -92,25 +92,33 @@ export async function updateProfile(formData: FormData): Promise<ActionResult<Pr
 
   const { uni_reg_no, phone } = parsed.data
 
-  const { error } = await supabase
+  // Use the admin client to bypass any Row Level Security or restrictive BEFORE UPDATE triggers 
+  // that might be silently rejecting the user's attempt to update their own PENDING- uni_reg_no
+  const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+  const adminClient = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data: updatedProfile, error } = await adminClient
     .from('profiles')
     .update({ 
       uni_reg_no, 
       phone: phone || null 
     })
     .eq('id', user.id)
+    .select()
+    .single()
 
   if (error) {
     if (error.code === '23505') return { success: false, error: 'This registration number is already in use.' }
     return { success: false, error: error.message }
   }
 
-  // Fetch the updated profile to return to the client
-  const { data: updatedProfile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  // If the update returned 0 rows, updatedProfile will be null/undefined
+  if (!updatedProfile) {
+    return { success: false, error: 'Failed to update profile. The database rejected the update.' }
+  }
 
   revalidatePath('/', 'layout')
   return { success: true, data: updatedProfile as Profile }

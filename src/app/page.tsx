@@ -11,6 +11,7 @@ import type { Metadata } from 'next'
 
 // Lazy load footer for better TTI
 const Footer = dynamic(() => import('@/components/layout/Footer').then(mod => mod.Footer))
+import { OnboardingGuard } from '@/components/auth/OnboardingGuard'
 
 export const metadata: Metadata = {
   title: "LOFO — Find What's Yours",
@@ -69,12 +70,14 @@ export default function LandingPage() {
             >
               Browse Items <ArrowRight size={18} />
             </Link>
-            <Link
-              href="/post"
-              className="px-8 py-3 rounded-[var(--radius-md)] border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent-dim)] text-base font-semibold transition-all active:scale-95"
-            >
-              Post Found Item
-            </Link>
+            <OnboardingGuard>
+              <Link
+                href="/post"
+                className="px-8 py-3 rounded-[var(--radius-md)] border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent-dim)] text-base font-semibold transition-all active:scale-95"
+              >
+                Post Found Item
+              </Link>
+            </OnboardingGuard>
           </div>
         </div>
       </section>

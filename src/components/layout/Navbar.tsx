@@ -120,17 +120,26 @@ export function Navbar() {
           <div className="flex h-16">
             {navLinks.map(({ href, label, icon: Icon }) => {
               const active = pathname === href || (href !== '/' && pathname.startsWith(href))
-              return (
-                <OnboardingGuard key={href}>
-                  <Link
-                    href={href}
-                    className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs transition-colors ${active ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'}`}
-                  >
-                    <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
-                    {label}
-                  </Link>
-                </OnboardingGuard>
+              
+              const linkNode = (
+                <Link
+                  href={href}
+                  className={`flex-1 flex flex-col items-center justify-center gap-1 text-xs transition-colors ${active ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'}`}
+                >
+                  <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
+                  {label}
+                </Link>
               )
+
+              if (href === '/post') {
+                return (
+                  <OnboardingGuard key={href}>
+                    {linkNode}
+                  </OnboardingGuard>
+                )
+              }
+
+              return <div key={href} className="flex flex-1 contents">{linkNode}</div>
             })}
             <Link
               href="/notifications"
