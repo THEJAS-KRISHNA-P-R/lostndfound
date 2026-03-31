@@ -18,7 +18,7 @@ export function CompleteProfileModal() {
   const searchParams = useSearchParams()
 
   const isMissingData = 
-    isAuthed && 
+    !!isAuthed && 
     initialized && 
     (!profile?.uni_reg_no || profile?.uni_reg_no.startsWith('PENDING'))
 
@@ -36,6 +36,13 @@ export function CompleteProfileModal() {
       setOnboardingOpen(true)
     }
   }, [isMissingData, onboardingOpen, setOnboardingOpen, pathname, searchParams])
+
+  // NEW: Auto-close logic if data arrives after hydration
+  useEffect(() => {
+    if (onboardingOpen && !isMissingData) {
+      setOnboardingOpen(false)
+    }
+  }, [isMissingData, onboardingOpen, setOnboardingOpen])
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CompleteProfileInput>({
     resolver: zodResolver(CompleteProfileSchema),
