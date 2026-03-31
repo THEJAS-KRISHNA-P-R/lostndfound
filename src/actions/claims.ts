@@ -11,7 +11,7 @@ import type { ActionResult } from '@/types'
 export async function createClaim(formData: FormData): Promise<ActionResult> {
   const user = await requireAuth()
   await requireOnboarded(user.id)
-  
+
   const supabase = await createClient()
 
   const itemId = formData.get('item_id') as string
@@ -64,7 +64,7 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
   const adminSupabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => [], setAll: () => {} } }
+    { cookies: { getAll: () => [], setAll: () => { } } }
   )
 
   // 1. Fetch Claim, Item, and Profiles
@@ -95,16 +95,18 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
 
   // 3. Automated Messaging / Notifications
   try {
-    const isReturningLost = itemType === 'lost'
+    const isLostItem = itemType === 'lost'
 
-    // Notify the Poster (The person who needs the item back OR the person who found it)
+    // Poster Notification (The person who originally created the item post)
     await adminSupabase.from('notifications').insert({
-      user_id: founderId,
+      user_id: founderId, // Actually the posterId
       sender_id: admin.id,
-      title: isReturningLost ? 'Item Found — Action Required' : 'Claim Approved — Action Required',
-      message: isReturningLost 
-        ? `Great news! ${claimee.full_name} has found your "${itemTitle}." Please coordinate the return using their contact details.`
-        : `Great news! The claim for "${itemTitle}" has been approved. Please coordinate the return with ${claimee.full_name}.`,
+      title: isLostItem
+        ? 'Your Lost Item was Found!'
+        : 'Owner Verified for Found Item',
+      message: isLostItem
+        ? `Great news! ${claimee.full_name} has reported finding your lost item: "${itemTitle}". Please reach out to them using the provided contact details to coordinate the return.`
+        : `We've successfully verified the owner for the item you found: "${itemTitle}". Please coordinate the safe return with ${claimee.full_name} using the provided contact details.`,
       type: 'contact_shared',
       metadata: {
         name: claimee.full_name,
@@ -114,14 +116,16 @@ export async function approveClaim(claimId: string, adminNote: string): Promise<
       }
     })
 
-    // Notify the Submitter
+    // Submitter Notification (The person who clicked "Claim" or "I found this")
     await adminSupabase.from('notifications').insert({
       user_id: claim.claimer_id,
       sender_id: admin.id,
-      title: isReturningLost ? 'Your Found Report was Approved! ✅' : 'Your Claim was Approved! ✅',
-      message: isReturningLost
-        ? `Your report for "${itemTitle}" has been verified. The owner has been notified and will reach out to you using your contact details soon.`
-        : `Your claim for "${itemTitle}" has been approved by our team. The owner has been notified and will reach out to you via your contact details soon.`,
+      title: isLostItem
+        ? 'Found Report Approved'
+        : 'Your Claim was Approved!',
+      message: isLostItem
+        ? `Thank you! Your report for finding "${itemTitle}" has been verified. The owner has been securely sent your contact details and will reach out to you soon.`
+        : `Great news! Your ownership claim for "${itemTitle}" has been fully verified. The finder has been notified and provided with your contact details so you can coordinate the return.`,
       type: 'claim_approved',
       metadata: { item_title: itemTitle, admin_note: adminNote }
     })
