@@ -22,9 +22,14 @@ export function AdminActions({ itemId, itemTitle }: AdminActionsProps) {
 
   return (
     <div className="relative group overflow-hidden bg-[#1A1D23]/60 backdrop-blur-md border border-amber-500/20 rounded-[var(--radius-md)] mt-12 mb-6">
-      <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/40" />
+      <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/40 z-10" />
       
-      <div className="p-5">
+      {/* Background Icon */}
+      <div className="absolute -bottom-4 -right-4 p-1 opacity-5 group-hover:opacity-10 transition-opacity z-0 pointer-events-none">
+        <ShieldCheck size={120} />
+      </div>
+
+      <div className="p-5 relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-amber-500" />
@@ -57,10 +62,6 @@ export function AdminActions({ itemId, itemTitle }: AdminActionsProps) {
             <DeleteItemButton itemId={itemId} title={itemTitle} />
           </div>
         </div>
-      </div>
-      
-      <div className="absolute bottom-0 right-0 p-1 opacity-10 group-hover:opacity-25 transition-opacity">
-        <ShieldCheck size={48} />
       </div>
     </div>
   )

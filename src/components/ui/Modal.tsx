@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 interface ModalProps {
@@ -14,6 +15,13 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md', closable = true }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure portal only kicks in comfortably during client-side hydration
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!open || !closable) return
@@ -26,10 +34,10 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md', c
     }
   }, [open, onClose, closable])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 pb-8 sm:pb-4">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
@@ -63,4 +71,6 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-md', c
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }
