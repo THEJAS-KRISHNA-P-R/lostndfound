@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import sharp from 'sharp'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
 
 export async function processAndUploadImage(formData: FormData): Promise<{ success: boolean, url?: string, error?: string }> {
   const file = formData.get('file') as File | null
@@ -11,7 +11,7 @@ export async function processAndUploadImage(formData: FormData): Promise<{ succe
   const folder = formData.get('folder') as string || 'uploads'
   
   if (!file) return { success: false, error: 'No file provided.' }
-  if (file.size > MAX_FILE_SIZE) return { success: false, error: 'File size must be under 5MB.' }
+  if (file.size > MAX_FILE_SIZE) return { success: false, error: 'File size must be under 25MB.' }
   if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
     return { success: false, error: 'Only JPEG, PNG, WebP, and GIF images are allowed.' }
   }
